@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    {% comment %} 
+    上一级文件夹下的/statics/style.css
+    {% endcomment %}
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+<body>
+    {% comment %} 顶端导航栏 {% endcomment %}
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href={% url 'home' %}>助肤康</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href={% url 'home'%}>主页</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">皮肤病介绍</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">症状查询</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">AI诊断</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">医师团队</a>
+            </li>
+          </ul>
+          <form class="d-flex" role="search">          
+            <button class="btn btn-outline-success me-2" type="button" href={% url 'login' %}>
+              登陆
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" type="button" href={% url 'register' %}>
+              注册
+            </button>
+          </form>
+        </div>
+      </div>
+    </nav>  
+
+    <br>
+    <br>
+    <br>
+    {% comment %} 主页 {% endcomment %}    
+
+<div class="container">
+
+  <main>
+    <h1 class="text-body-emphasis">皮肤病辅助诊断系统</h1>
+    <p class="fs-5 col-md-8">
+      助肤康是由肤康医院设计的针对皮肤病灶的辅助诊断系统，旨在为用户提供便捷、高效的皮肤病诊断服务。通过部署预训练深度学习模型，用户可以轻松上传皮肤照片，系统将自动进行图像识别，并给出初步诊断结果。用户还可以选择预约专家问诊，与专业医师进行一对一沟通，获取更详细的诊断建议。
+    </p>
+
+    <div class="mb-5">
+      <a href="#" class="btn btn-primary btn-lg px-4">
+        开始使用
+      </a>
+    </div>
+
+    <hr class="col-3 col-md-2 mb-5">
+
+    <div class="row g-5">
+      <div class="col-md-6">
+        <h2 class="text-body-emphasis">皮肤病分类模型</h2>
+        <p>
+          本系统采用先进的深度学习技术，建立了智能分类模型，并基于哈佛大学的HAM10000数据集进行训练，达到了较高的准确率和精度，可以对上传的皮肤病灶照片进行自动识别和分类。
+        </p>
+        <ul class="list-unstyled ps-0">
+          <li>
+            <a class="icon-link mb-1" href="#" rel="noopener" target="_blank">
+              <svg class="bi" width="16" height="16"><use xlink:href="#arrow-right-circle"/></svg>
+              使用模型
+            </a>
+          </li>
+          <li>
+            <a class="icon-link mb-1" href="#" rel="noopener" target="_blank">
+              <svg class="bi" width="16" height="16"><use xlink:href="#arrow-right-circle"/></svg>
+              数据集介绍
+            </a>
+          </li>
+          <li>
+            <a class="icon-link mb-1" href="#" rel="noopener" target="_blank">
+              <svg class="bi" width="16" height="16"><use xlink:href="#arrow-right-circle"/></svg>
+              模型介绍
+            </a>
+          </li>
+          <li>
+            <a class="icon-link mb-1" href="#" rel="noopener" target="_blank">
+              <svg class="bi" width="16" height="16"><use xlink:href="#arrow-right-circle"/></svg>
+              模型训练
+            </a>
+        </ul>
+      </div>
+
+      <div class="col-md-6">
+        <h2 class="text-body-emphasis">医师团队</h2>
+        <p>
+          肤康医院的皮肤病专科医师团队具有丰富的临床经验和深厚的专业知识，能够为用户提供准确、可靠的诊断建议。我们的团队将竭诚为您服务，帮助您解决皮肤问题。
+          </p>
+        <ul class="list-unstyled ps-0">
+          <li>
+            <a class="icon-link mb-1" href="#">
+              <svg class="bi" width="16" height="16"><use xlink:href="#arrow-right-circle"/></svg>
+              医生信息
+            </a>
+          </li>
+          <li>
+            <a class="icon-link mb-1" href="#">
+              <svg class="bi" width="16" height="16"><use xlink:href="#arrow-right-circle"/></svg>
+              预约问诊
+            </a>
+          </li>
+          <li>
+            <a class="icon-link mb-1" href="#">
+              <svg class="bi" width="16" height="16"><use xlink:href="#arrow-right-circle"/></svg>
+              肤康医院官方网站
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </main>
+  <footer class="pt-5 my-5 text-body-secondary border-top">
+    Created by YanaZ &middot; &copy; 2024
+  </footer>
+  </div>
+
+{% comment %} <script src="/docs/5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script> {% endcomment %}
+
+{% comment %} 页尾 {% endcomment %}
+
+
+
+</body>
+</html>
