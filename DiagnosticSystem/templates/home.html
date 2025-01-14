@@ -52,10 +52,15 @@
     <br>
     <br>
     <br>
+    
+    
     {% comment %} 主页 {% endcomment %}    
+
+
 
 <div class="container">
 
+  {% block content %}
   <main>
     <h1 class="text-body-emphasis">皮肤病辅助诊断系统</h1>
     <p class="fs-5 col-md-8">
@@ -131,6 +136,8 @@
       </div>
     </div>
   </main>
+
+  {% endblock content %}
 
 
   <footer class="pt-5 my-5 text-body-secondary border-top">
