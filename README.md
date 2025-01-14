@@ -1,6 +1,5 @@
 # TODO
 
-- 删掉了User.email
 
 <!-- - home页面 注册按钮路由 -->
 <!-- - User password -->
