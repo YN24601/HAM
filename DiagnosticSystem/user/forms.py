@@ -7,7 +7,7 @@ class PatientCreationForm(forms.ModelForm):
 
     class Meta:
         model = Patient
-        fields = ['idcard', 'name', 'mobile', 'gender']  # 包括患者相关的字段
+        fields = ['idcard', 'name', 'gender', 'mobile', 'email']  # 包括患者相关的字段
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
