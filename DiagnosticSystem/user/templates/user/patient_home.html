@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>患者主页</title>
+</head>
+<body>
+    <h1>欢迎, {{ patient.name }}</h1>
+    {{patient.idcard}}
+    <a href="{% url 'patient_logout' %}">注销</a>
+</body>
+</html>

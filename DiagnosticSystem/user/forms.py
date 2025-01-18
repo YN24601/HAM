@@ -25,51 +25,19 @@ class PatientCreationForm(forms.ModelForm):
             patient.save()  # 保存患者对象
         return patient
 
+class PatientLoginForm(forms.Form):
+    idcard = forms.CharField(
+        max_length=20, 
+        required=True, 
+        label='身份证号',
+        widget=forms.TextInput(attrs={'placeholder': '请输入身份证号'})
+    )
+    password = forms.CharField(
+        max_length=128, 
+        required=True, 
+        label='密码',
+        widget=forms.PasswordInput(attrs={'placeholder': '请输入密码'})
+    )
 
-
-
-'''
-
-class PatientCreationForm(UserCreationForm):
-    class Meta:
-        model = Patient
-        fields = ['name', 'idcard', 'mobile', 'password1', 'password2']
-        labels = {
-            'name': '姓名',
-            'idcard': '身份证号',
-            'mobile': '手机号',
-            'password1': '密码',
-            'password2': '确认密码',
-        }
-        model = User  # 使用 User 模型而不是 Patient
-        fields = ['username', 'password1', 'password2']
-        labels = {
-            'username': '用户名',
-            'password1': '密码',
-            'password2': '确认密码',
-        }
-        
-    password1 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-    password2 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-    # 添加errors属性
-
-
-    def save(self, commit=True):
-        # 首先保存 User 实例
-        user = super().save(commit=False)
-        if commit:
-            user.save()
-
-        # 然后创建关联的 Patient 实例
-        patient = Patient.objects.create(
-            user=user,
-            name=self.cleaned_data.get('name'),
-            idcard=self.cleaned_data.get('idcard'),
-            mobile=self.cleaned_data.get('mobile'),
-            gender=self.cleaned_data.get('gender')
-        )
-        return patient
-
-'''
 
 
