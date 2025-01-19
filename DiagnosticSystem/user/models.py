@@ -1,14 +1,20 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password  # 用于密码加密
 
+gender_choices = [
+    ('M', '男'),
+    ('F', '女'),
+]
+
 class Patient(models.Model):
     idcard = models.CharField('身份证号', max_length=20, blank=True, unique=True)
     name = models.CharField('姓名', max_length=50, blank=True)
-    gender = models.CharField('性别', max_length=10, choices=[('M', '男'), ('F', '女')])
+    gender = models.CharField('性别', max_length=10, choices=gender_choices)
     mobile = models.CharField('手机号', max_length=11, blank=True, unique=True)
     email = models.EmailField('邮箱', max_length=100, unique=True)    
     password = models.CharField('密码', max_length=128)  # 加密后的密码
     avatar = models.CharField('头像', max_length=100, default='static/images/default_user.jpg')
+    # avatar = models.CharField('头像', max_length=100, default='/Users/yanazhang/Documents/vscodeProjects/pythonProjects/HAM/DiagnosticSystem/static/images/default_user.jpg')
 
     def set_password(self, raw_password):
         """加密密码并保存"""
@@ -27,21 +33,19 @@ class Patient(models.Model):
         verbose_name_plural = verbose_name
 
 
-'''
 class Doctor(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='doctor')  # 关联User模型
+    docID = models.CharField('医生编号', max_length=20, blank=True, unique=True)
     name = models.CharField('姓名', max_length=50)
     title = models.CharField('职称', max_length=50)  # 职称，如：主任医师、副主任医师等
-    department = models.CharField('科室', max_length=100)  # 科室，如：内科、外科等
-    mobile = models.CharField('手机号', max_length=11, blank=True)
     gender = models.CharField('性别', max_length=10, choices=gender_choices)
+    email = models.EmailField('邮箱', max_length=100, unique=True)
+    intro = models.TextField('简介', max_length=500, blank=True)
+    avatar = models.CharField('头像', max_length=100, default='static/images/default_doctor.jpg')
+
 
     def __str__(self):
         return f"Dr. {self.name} ({self.title})"
 
     class Meta:
-        verbose_name = 'Doctor'
-        verbose_name_plural = 'Doctors'
-'''
-
-    
+        verbose_name = '医生'
+        verbose_name_plural = verbose_name
