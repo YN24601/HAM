@@ -9,7 +9,7 @@
     {% comment %} 
     上一级文件夹下的/statics/style.css
     {% endcomment %}
-    <link rel="stylesheet" href="style.css">
+    {% comment %} <link rel="stylesheet" href="style.css"> {% endcomment %}
     <title>助肤康</title>
 </head>
 <body>
@@ -26,7 +26,7 @@
               <a class="nav-link active" aria-current="page" href={% url 'home'%}>主页</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">皮肤病介绍</a>
+              <a class="nav-link" href={% url 'disease_intro'%}>皮肤病介绍</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#">症状查询</a>
@@ -48,20 +48,16 @@
           </form>
         </div>
       </div>
-    </nav>  
-
-    <br>
-    <br>
-    <br>
-    
+    </nav>    
     
     {% comment %} 主页 {% endcomment %}    
-
-
 
 <div class="container">
 
   {% block content %}
+  <br>
+    <br>
+    <br>
   <main>
     <h1 class="text-body-emphasis">皮肤病辅助诊断系统</h1>
     <p class="fs-5 col-md-8">
@@ -79,7 +75,7 @@
     <div class="row g-5">
       <div class="col-md-6">
         <h2 class="text-body-emphasis">皮肤病分类模型</h2>
-        <p>
+        <p class='lead'>
           本系统采用先进的深度学习技术，建立了智能分类模型，并基于哈佛大学的HAM10000数据集进行训练，达到了较高的准确率和精度，可以对上传的皮肤病灶照片进行自动识别和分类。
         </p>
         <ul class="list-unstyled ps-0">
@@ -142,7 +138,7 @@
 
 
   <footer class="pt-5 my-5 text-body-secondary border-top">
-    Created by YanaZ &middot; &copy; 2024
+    Created by YanaZ &middot; &copy; 2025
   </footer>
   </div>
 

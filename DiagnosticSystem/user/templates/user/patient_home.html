@@ -41,8 +41,8 @@
           
           <div class="flex-shrink-0 dropdown">
             <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle show" data-bs-toggle="dropdown" aria-expanded="true">
-                <img src="https://github.com/mdo.png" width="32" height="32" class="rounded-circle">
-                {% comment %} <img src="{{ patient.avatar }}" width="32" height="32" class="rounded-circle"> {% endcomment %}
+                {% comment %} <img src="https://github.com/mdo.png" width="32" height="32" class="rounded-circle"> {% endcomment %}
+                <img src="{{ user.avatar.url }}" alt="avatar" width="32" height="32" class="rounded-circle">
             </a>
             <ul class="dropdown-menu text-small shadow show" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate3d(0.5px, 34px, 0px);" data-popper-placement="bottom-end">
               <li><a class="dropdown-item" href="#">个人信息</a></li>
@@ -57,9 +57,6 @@
       </div>
     </nav>  
 
-    <br>
-    <br>
-    <br>
     
     
     {% comment %} 主页 {% endcomment %}    
@@ -69,6 +66,10 @@
 <div class="container">
 
   {% block content %}
+
+  <br>
+  <br>
+  <br>
   <main>
     <h1 class="text-body-emphasis">皮肤病辅助诊断系统</h1>
     <p class="fs-5 col-md-8">
@@ -149,7 +150,7 @@
 
 
   <footer class="pt-5 my-5 text-body-secondary border-top">
-    Created by YanaZ &middot; &copy; 2024
+    Created by YanaZ &middot; &copy; 2025
   </footer>
   </div>
 
