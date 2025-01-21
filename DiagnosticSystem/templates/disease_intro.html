@@ -2,7 +2,7 @@
 {% load static %}
 {% comment %} {% load staticfiles %} {% endcomment %}
 {% block content %}
-
+  
 <main>
     <section class="py-5 text-center container">
       <div class="row py-lg-5">
@@ -152,6 +152,37 @@
           </div>
   
   </main>
+  <script>
+document.addEventListener('DOMContentLoaded', function () {
+    // 示例的 AJAX 请求，用于触发后端检查用户登录状态
+    function checkLoginStatus(url) {
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'unauthenticated') {
+                // 弹出确认窗口
+                if (confirm('您尚未登录，是否前往登录页面？')) {
+                    // 用户点击确定，跳转到登录页面
+                    window.location.href = data.redirect_url;
+                } else {
+                    // 用户点击取消，停留在当前页面
+                    console.log('用户选择留在当前页面');
+                }
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // 调用函数进行检查，示例 URL 替换为实际的接口 URL
+    checkLoginStatus('/your/protected/endpoint/');
+});
+</script>
+
 {% endblock content %}
 
 
