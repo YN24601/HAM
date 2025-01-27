@@ -39,5 +39,18 @@ class PatientLoginForm(forms.Form):
         widget=forms.PasswordInput(attrs={'placeholder': '请输入密码'})
     )
 
+class DoctorLoginForm(forms.Form):
+    idcard = forms.CharField(
+        max_length=20, 
+        required=True, 
+        label='编号',
+        widget=forms.TextInput(attrs={'placeholder': '请输入编号'})
+    )
+    password = forms.CharField(
+        max_length=128, 
+        required=True, 
+        label='密码',
+        widget=forms.PasswordInput(attrs={'placeholder': '请输入密码'})
+    )
 
 
