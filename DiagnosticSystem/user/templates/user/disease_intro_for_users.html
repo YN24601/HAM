@@ -1,0 +1,188 @@
+{% extends "user/patient_home.html" %}
+{% load static %}
+{% comment %} {% load staticfiles %} {% endcomment %}
+{% block content %}
+
+<main>
+    <section class="py-5 text-center container">
+      <div class="row py-lg-5">
+        <div class="col-lg-10 col-md-6 mx-auto">
+          <h1 class="fw">皮肤病介绍</h1>
+          <p class="fs-5">皮肤病变是常见的健康问题，随着现代生活方式的变化和环境因素的影响，皮肤病的种类和发病率不断增加。皮肤病分为多种类型，其中包括良性病变和恶性病变。以下七种皮肤病变是临床中最常见的类别，涵盖了不同的发病机制和临床表现，它们分别是：黑色素痣、黑色素瘤、
+良性角化病、基底细胞癌、日光角化病和和上皮内癌、血管病变、皮肤纤维瘤。每种病灶都有其独特的临床表现、危害性以及治疗方法。掌握它们的特点有助于早期识别病变，并及时采取适当的诊疗措施，在本页中，您可以查看这些病变的详细信息。
+{% comment %} <br>我们使用了了HAM10000（Human Against Machine with 10000 training images，10000样本人机对抗训练集）作为数据集，这是HAM10000 数据集是一个用于皮肤病变分类和分析的公共数据集，常用于机器学习和计算机视觉研究，特别是皮肤癌诊断的自动化。HAM10000代表"Human Against Machine with 10000"的缩写，数据集包含了大约 10,000 张皮肤病变的图像，涵盖了多个皮肤病变类型，并已标注出相应的标签，广泛应用于医学影像处理、深度学习模型的训练以及皮肤病的自动化诊断 {% endcomment %}
+          </p>
+          <p>
+            {% comment %} <a href="#" class="btn btn-primary my-2">查看数据集详情</a> {% endcomment %}
+            {% comment %} <a href="#" class="btn btn-secondary my-2">Secondary action</a> {% endcomment %}
+          </p>
+        </div>
+      </div>
+    </section>
+  
+    <div class="album py-5 bg-body-tertiary">
+      <div class="container">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+          <div class="col">
+            <div class="card shadow-sm">
+              <img src="{% static 'images/dataset/akiec.jpg' %}" class="card-img-top" alt="AKIEC">
+              <div class="card-body">
+                <p class="card-text">
+                    日光角化病和上皮内癌（Actinic Keratoses and Intraepithelial Carcinoma，AKIEC）
+                </p>
+                <p class="card-text">常见于中老年人，特别是长期暴露于阳光下的人群中，皮肤表面出现干燥、粗糙的斑点或小块。如果未加以治疗，可能会发展成皮肤癌，因此需要密切监控</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href='{% url 'akiec' %}'">详情</button>
+                    {% comment %} <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button> {% endcomment %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card shadow-sm">
+                <img src="{% static 'images/dataset/bcc.jpg' %}" class="card-img-top" alt="AKIEC">
+              <div class="card-body">
+                <p class="card-text">
+                    基底细胞癌（Basal Cell Carcinoma，BCC）
+                </p>
+                <p class="card-text">是最常见的皮肤癌类型，很少转移，但如果不治疗，会破坏性生长。常见于日光暴露的部位，如面部、颈部和手臂，表现为透明、光滑、隆起的皮肤病变。</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href='{% url 'bcc' %}'">详情</button>
+                    {% comment %} <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button> {% endcomment %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card shadow-sm">
+                <img src="{% static 'images/dataset/bkl.jpg' %}" class="card-img-top" alt="AKIEC">
+                <div class="card-body">
+                <p>
+                    良性角化病（Benign Keratosis，BKL）
+                </p>
+                <p class="card-text">
+                    是一个通用类别，包括多种良性皮肤病变，表现为坚硬的小肿块，颜色可以从浅黄到棕色不等。大多数良性角化病不会恶化，通常对患者不会构成重大健康威胁，但外观上可能导致美观问题。
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href='{% url 'bkl' %}'">详情</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+          <div class="col">
+            <div class="card shadow-sm">
+                <img src="{% static 'images/dataset/df.jpg' %}" class="card-img-top" alt="AKIEC">
+                <div class="card-body">
+                    <p>
+                        皮肤纤维瘤（Dermatofibroma，DF）
+                    </p>
+                <p class="card-text">
+                    是一种良性皮肤病变，可视为纤维组织良性增生或轻微创伤引起的炎症反应。常见的表现是外围出现网状纹，中央有白色斑块，呈现出纤维化。皮肤纤维瘤通常是良性的，不会转变为恶性，但有时可能会因摩擦或损伤引起疼痛
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href='{% url 'df' %}'">详情</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card shadow-sm">
+                <img src="{% static 'images/dataset/nv.jpg' %}" class="card-img-top" alt="AKIEC">
+                <div class="card-body">
+                    <p>
+                        黑色素痣（Melanocytic Nevi，NV）
+                    </p>
+                <p class="card-text">
+                    由黑色素细胞增生所致，是皮肤上的常见良性肿瘤，可以是先天或后天形成的。常见于儿童和成人，通常不变大且没有明显不适，表现为对称、边界清晰的褐色或黑色小斑点。
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href='{% url 'nv' %}'">详情</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card shadow-sm">
+                <img src="{% static 'images/dataset/mel.jpg' %}" class="card-img-top" alt="AKIEC">
+              
+                <div class="card-body">
+                    <p>
+                        黑色素瘤（Melanoma，MEL）
+                    </p>
+                <p class="card-text">
+                    是一种高度恶性的皮肤癌，来源于黑色素细胞，通常表现为形状不规则、边界模糊、颜色变化的病变。黑色素瘤是皮肤癌中最为致命的一种，易转移至其他器官，如果在早期进行切除，可以通过简单的手术切除治愈。 
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href='{% url 'mel' %}'">详情</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+          <div class="col">
+            <div class="card shadow-sm">
+                <img src="{% static 'images/dataset/vasc.jpg' %}" class="card-img-top" alt="AKIEC">
+                <div class="card-body">
+                    <p>
+                        血管性皮肤病变（Vascular Skin Lesions Category，VASC）
+                    </p>
+                <p class="card-text">
+                    包括樱桃状血管瘤、血管角化瘤、化脓性肉芽肿、出血，常见于面部或四肢。皮肤表面可能会出现红色或紫色的斑块，或呈现出“蜘蛛状”血管扩张，通常无痛，血管病变大多数是良性的，极少数情况下，某些血管病变可能会与其他疾病相关。
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.location.href='{% url 'vasc' %}'">详情</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+  </main>
+  <script>
+document.addEventListener('DOMContentLoaded', function () {
+    // 示例的 AJAX 请求，用于触发后端检查用户登录状态
+    function checkLoginStatus(url) {
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'unauthenticated') {
+                // 弹出确认窗口
+                if (confirm('您尚未登录，是否前往登录页面？')) {
+                    // 用户点击确定，跳转到登录页面
+                    window.location.href = data.redirect_url;
+                } else {
+                    // 用户点击取消，停留在当前页面
+                    console.log('用户选择留在当前页面');
+                }
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // 调用函数进行检查，示例 URL 替换为实际的接口 URL
+    checkLoginStatus('/your/protected/endpoint/');
+});
+</script>
+
+{% endblock content %}
+
+

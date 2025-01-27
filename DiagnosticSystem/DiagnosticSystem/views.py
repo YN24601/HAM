@@ -6,11 +6,14 @@ from .mixins import LoginRequiredMixin
 class HomeView(TemplateView):
     template_name = 'home.html'
     
-class DiseaseView(LoginRequiredMixin, TemplateView):
+class DiseaseView(TemplateView):
+# class DiseaseView(LoginRequiredMixin, TemplateView):
     template_name = 'disease_intro.html'
-    def get(self, request, *args, **kwargs):
-        if request.is_ajax():
-            return JsonResponse({'status': 'authenticated'})
-        return super().get(request, *args, **kwargs)
+    # def get(self, request, *args, **kwargs):
+    #     if request.is_ajax():
+    #         return JsonResponse({'status': 'authenticated'})
+    #     return super().get(request, *args, **kwargs)
+    
+
 
 
