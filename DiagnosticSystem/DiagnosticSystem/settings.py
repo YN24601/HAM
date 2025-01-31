@@ -129,6 +129,5 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),  # 你已经在 static/ 目录下存储了静态文件
 ]
 
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static1')
-# AUTH_USER_MODEL = 'auth.User'
-# AUTH_USER_MODEL = 'user.User'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
