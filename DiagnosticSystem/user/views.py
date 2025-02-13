@@ -52,11 +52,15 @@ class PatientHomeView(TemplateView):
     #     context['patient_name'] = self.request.session.get('patient_name', '游客')
     #     return context
     def get(self, request):
+        # 获取当前用户的patient_id
         patient_id = request.session.get('patient_id')
+        # 如果存在patient_id，则获取对应的patient对象
         if patient_id:
             patient = Patient.objects.get(id=patient_id)
+        # 否则，将patient设置为None
         else:
             patient = None
+        # 渲染模板，并将patient对象传递给模板
         return render(request, 'user/patient_home.html', {'patient': patient})
 
 # 用户注销
@@ -163,3 +167,10 @@ class DoctorHomeView(TemplateView):
             doctor = None
         return render(request, 'doctor/doctor_home.html', {'doctor': doctor})
 
+
+# 用户注销
+def DoctorLogout(request):
+    # 清除会话
+    request.session.flush()
+    # return HttpResponseRedirect(reverse('user_login'))
+    return HttpResponseRedirect(reverse('home'))

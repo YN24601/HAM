@@ -22,29 +22,6 @@ class DiseaseView(TemplateView):
     #     if request.is_ajax():
     #         return JsonResponse({'status': 'authenticated'})
     #     return super().get(request, *args, **kwargs)
-    
-
-'''
-class ClassificationView(TemplateView):
-    template_name = 'classification.html'
-    def get(self, request, *args, **kwargs):
-        if request.method == 'POST':
-            upload_file = request.FILES['file']
-            if not os.path.exists(settings.MEDIA_ROOT):
-                os.makedirs(settings.MEDIA_ROOT)
-            file_path = os.path.join(settings.MEDIA_ROOT, upload_file.name)
-            with open(file_path, 'wb') as f:
-                for chunk in upload_file.chunks():
-                    f.write(chunk)
-            try:
-                pass #TODO: 调用模型进行预测
-            except Exception as e:
-                return render(request, 'cereal_classification/index.html', {
-                'error': f"Error processing image: {str(e)}"
-                })
-            return render(request, 'classification_results.html', {'predicted_class': predicted_class})
-        return render(request, 'classification.html')
-'''
 
 
 class ClassificationView(TemplateView):
@@ -110,7 +87,7 @@ class ClassificationView(TemplateView):
 
             except Exception as e:
                 return render(request, 'classification.html', {
-                    'error': f"Error processing image: {str(e)}"
+                    'error': f"无法处理文件，请确认您上传了正确的文件类型。错误信息：{str(e)}"
                 })
 
         return render(request, 'classification.html')

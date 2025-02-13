@@ -17,7 +17,7 @@ class Patient(models.Model):
     email = models.EmailField('邮箱', max_length=100, unique=True)    
     password = models.CharField('密码', max_length=128)  # 加密后的密码
     # avatar = models.CharField('头像', max_length=100, default='static/images/default_user.jpg')
-    avatar = models.ImageField('头像', upload_to='avatars/patients/', default='static/images/default_user.jpg')
+    avatar = models.ImageField('头像', upload_to='avatars/patients/', default='avatars/patients/default_patient.jpg')
     # avatar = models.CharField('头像', max_length=100, default='/Users/yanazhang/Documents/vscodeProjects/pythonProjects/HAM/DiagnosticSystem/static/images/default_user.jpg')
     created_at = models.DateTimeField('创建时间', auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField('更新时间', auto_now=True, null=True, blank=True)
@@ -74,7 +74,7 @@ class Doctor(models.Model):
     birthday = models.DateField('出生日期', null=True, blank=True)
     email = models.EmailField('邮箱', max_length=100, unique=True, blank=False)
     intro = models.TextField('简介', max_length=500, blank=True)
-    avatar = models.ImageField('头像', upload_to='avatars/doctors/', default='static/images/default_doctor.jpg')
+    avatar = models.ImageField('头像', upload_to='avatars/doctors/', default='avatars/doctors/default_doctor.jpg')
     password = models.CharField('密码', max_length=128, default='password')
     created_at = models.DateTimeField('创建时间', auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField('更新时间', auto_now=True, null=True, blank=True)

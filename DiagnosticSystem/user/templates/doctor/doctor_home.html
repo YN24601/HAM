@@ -1,1 +1,108 @@
-<h1>doctor home</h1>
+{% load widget_tweaks %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    {% comment %} 
+    上一级文件夹下的/statics/style.css
+    {% endcomment %}
+    {% comment %} <link rel="stylesheet" href="style.css"> {% endcomment %}
+    <title>助肤康</title>
+</head>
+<body>
+    {% comment %} 顶端导航栏 {% endcomment %}
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href={% url 'dashboard' %}>助肤康</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href={% url 'dashboard'%}>主页</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">预约管理</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">接诊</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">诊疗记录查询</a>
+            </li>
+          </ul>
+          
+          <div class="flex-shrink-0 dropdown">
+            <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle show" data-bs-toggle="dropdown" aria-expanded="true">
+                {% comment %} <img src="{% static 'images/default_doctor.jpg' %}" alt="avatar" width="32" height="32" class="rounded-circle"> {% endcomment %}
+                {% comment %} use {{ doctor.avatar}} {% endcomment %}
+                <img src="{{ doctor.avatar.url }}" alt="avatar" width="32" height="32" class="rounded-circle">
+                {% comment %} <img src="/static/images/default_doctor.jpg" alt="avatar" width="32" height="32" class="rounded-circle"> {% endcomment %}
+            </a>
+            <ul class="dropdown-menu text-small shadow show" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate3d(0.5px, 34px, 0px);" data-popper-placement="bottom-end">
+              <li><a class="dropdown-item" href="#">个人信息</a></li>
+              <li><a class="dropdown-item" href="#">修改密码</a></li>
+              {% comment %} <li><a class="dropdown-item" href="#">诊疗信息</a></li> {% endcomment %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href={% url 'doctor_logout'%}>退出系统</a></li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </nav>  
+
+    
+    
+    {% comment %} 主页 {% endcomment %}    
+
+
+
+<div class="container">
+
+  {% block content %}
+
+  <br>
+  <br>
+  <br>
+  <main>
+    <div class="row align-items-md-stretch">
+      <div class="col-md-6">
+        <div class="h-100 p-5 text-bg-dark rounded-3">
+          <h2>预约管理</h2>
+          <p>您好，{{ doctor.name }}医生。</p>
+          <p>管理您的预约信息，查看预约状态。</p>
+          <a href="#" class="btn btn-outline-light" type="button">查看预约</a>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="h-100 p-5 bg-light border rounded-3">
+          <h2>接诊</h2>
+          <p>您好，{{ doctor.name }}医生。</p>
+          <p>管理您的接诊信息，查看接诊状态。</p>
+          <a href="#" class="btn btn-outline-secondary" type="button">查看接诊</a>
+        </div>
+      </div>
+    </div>
+    <br>
+    <br>
+    <br>
+    <div class="row align-items-md-stretch">
+      <div class="col-md-6">
+  </main>
+
+  {% endblock content %}
+
+
+  <footer class="pt-5 my-5 text-body-secondary border-top">
+    Created by YanaZ &middot; &copy; 2025
+  </footer>
+  </div>
+
+</body>
+</html>
