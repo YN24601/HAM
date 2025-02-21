@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.hashers import make_password
 # Register your models here.
-from .models import Patient, Doctor
+from .models import Patient, Doctor, DoctorSchedule, Appointment, MedicalRecord
 
 class DoctorAdmin(admin.ModelAdmin):
     # 在 admin 界面中显示字段
@@ -21,3 +21,6 @@ class PatientAdmin(admin.ModelAdmin):
 
 admin.site.register(Patient, PatientAdmin)
 admin.site.register(Doctor, DoctorAdmin)
+admin.site.register(DoctorSchedule)
+admin.site.register(Appointment)
+admin.site.register(MedicalRecord)

@@ -94,3 +94,55 @@ class Doctor(models.Model):
     class Meta:
         verbose_name = '医生'
         verbose_name_plural = verbose_name
+
+class DoctorSchedule(models.Model):
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, verbose_name='医生')
+    date = models.DateField('日期', null=False, blank=False)
+    start_time = models.TimeField('开始时间', null=False, blank=False)
+    end_time = models.TimeField('结束时间', null=False, blank=False)
+    is_available = models.BooleanField('是否可预约', default=True)
+    max_patients = models.IntegerField('最大患者数', default=1)
+    created_at = models.DateTimeField('创建时间', auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField('更新时间', auto_now=True, null=True, blank=True)
+    
+    def __str__(self):
+        return f"{self.doctor} - {self.date} {self.start_time} - {self.end_time}"
+
+    class Meta:
+        verbose_name = '医生排班'
+        verbose_name_plural = verbose_name
+        unique_together = ('doctor', 'date', 'start_time', 'end_time') # 确保医生在同一日期和时间段内没有重复的排班
+
+class AppointmentStatus(models.TextChoices):
+    PENDING = 'pending', '待处理'
+    CONFIRMED = 'confirmed', '已确认'
+    CANCELLED = 'cancelled', '已取消'
+    COMPLETED = 'completed', '已完成'
+
+class Appointment(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, verbose_name='患者')
+    doctor_schedule = models.ForeignKey(DoctorSchedule, on_delete=models.CASCADE, verbose_name='医生排班')
+    status = models.CharField('状态', max_length=20, choices=AppointmentStatus.choices, default=AppointmentStatus.PENDING)
+    notes = models.TextField('备注', max_length=500, blank=True)
+    created_at = models.DateTimeField('创建时间', auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField('更新时间', auto_now=True, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.patient} 预约 {self.doctor} - {self.status}"
+    
+    class Meta:
+        verbose_name = '预约记录'
+        verbose_name_plural = verbose_name
+
+class MedicalRecord(models.Model):
+    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE, verbose_name='预约记录')
+    diagnosis = models.TextField('诊断结果', max_length=500, blank=True)
+    treatment = models.TextField('治疗方案', max_length=500, blank=True)
+    created_at = models.DateTimeField('创建时间', auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.appointment} - 诊疗结果：{self.diagnosis}"
+
+    class Meta:
+        verbose_name = '诊疗记录'
+        verbose_name_plural = verbose_name

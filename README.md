@@ -4,24 +4,43 @@
 <!-- - User password -->
 <!-- - 注册页面密码 -->
 - 主页
-  <!-- - 皮肤病介绍 登录页面 -->
-  <!-- - 皮肤病介绍 未登录页面提示 -->
-  - 详情页面 做几张图
-  - 删掉症状查询
-  - ai诊断
-    - mobilenet似乎准确率高点 跑一下v2和v3
-    - 如果上者效果较为理想 考虑继续扩充数据集
+  - 皮肤病详情页面
   - 建立医生模型后加几个进去 查询
+  - 预约医生 查询（筛选：可预约时间、医生姓名、医生性别、医生职位）
+  - 消息提醒（django的signals）
 - 用户
   - 模型
-    - 解析出生年月(医生界面)
+    - 时间表 存储医生未来一周的预约时间
+      - schedule_id
+      - docID/id(doctor) 外键
+      - date
+      - time
+      - is_available
+      - num_of_appointment
+      <!-- - patient_id 外键 -->
+    - 预约表
+      - appointment_id
+      - patient_id 外键
+      - doctor_id 外键
+      - schedule_id 外键
+      - appointment_date
+      - appointment_time
+      - appointment_status
+      - created_at
+    - 诊疗记录表
+      - record_id
+      - patient_id 外键
+      - doctor_id 外键
+      - appointment_id 外键
+      - diagnosis
+      - prescription
+      - created_at
   - 注册
-    <!-- - 注册页面表格样式 -->
     - 注册页面数据验证
     - 注册页面验证提示
     - 验证码
-  - 登陆
   - 主页
+    - 预约医生
     - 个人信息
       - 修改个人信息
       - 修改密码
@@ -33,12 +52,7 @@
       - ai诊断
       - 医师团队
 - 医生
-  - 模型
-    - 建立医生模型
-  - 登录
-    - 首页登录转跳
   - 页面
-    - 登录页面
     - 首页
       - 预约管理
       - 预约信息

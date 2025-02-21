@@ -19,7 +19,8 @@ class DiseaseView(TemplateView):
 # class DiseaseView(LoginRequiredMixin, TemplateView):
     template_name = 'disease_intro.html'
     # def get(self, request, *args, **kwargs):
-    #     if request.is_ajax():
+    #     # 检查是否是 AJAX 请求
+    #     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
     #         return JsonResponse({'status': 'authenticated'})
     #     return super().get(request, *args, **kwargs)
 
