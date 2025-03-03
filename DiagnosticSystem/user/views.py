@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.views.generic import TemplateView, CreateView, FormView
+from django.views.generic import TemplateView, CreateView, FormView, UpdateView
 from .models import Patient, Doctor
-from .forms import PatientCreationForm, PatientLoginForm
+from .forms import PatientCreationForm, PatientLoginForm, PatientForm
 from .forms import DoctorLoginForm
 from DiagnosticSystem.mixins import LoginRequiredMixin
+
 
 # 用户注册
 class PatientCreateView(CreateView):
@@ -47,10 +48,6 @@ class PatientLoginView(FormView):
 # 用户主页
 class PatientHomeView(TemplateView):
     template_name = 'user/patient_home.html'
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     context['patient_name'] = self.request.session.get('patient_name', '游客')
-    #     return context
     def get(self, request):
         # 获取当前用户的patient_id
         patient_id = request.session.get('patient_id')
@@ -70,9 +67,38 @@ def PatientLogout(request):
     # return HttpResponseRedirect(reverse('user_login'))
     return HttpResponseRedirect(reverse('home'))
 
+# PatientProfileView
+class PatientProfileView(LoginRequiredMixin, UpdateView):
+    template_name = 'user/patient_profile.html'
+    form_class = PatientForm
+    
+    def get_object(self):
+        patient_id = self.request.session.get('patient_id')
+        return Patient.objects.get(id=patient_id)
+    
+    def get_success_url(self):
+        return reverse('patient_profile') 
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # patient_id = self.request.session.get('patient_id')
+        # patient = Patient.objects.get(id=patient_id)
+        context['patient'] = self.object
+        return context
+
 # 皮肤病介绍
 class DiseaseViewForUser(TemplateView):
     template_name = 'user/disease_intro_for_users.html'
+
+    def get(self, request):
+        # 获取当前用户的patient_id
+        patient_id = request.session.get('patient_id')
+        # 如果存在patient_id，则获取对应的patient对象
+        if patient_id:
+            patient = Patient.objects.get(id=patient_id)
+        else:
+            patient = None
+        return render(request, 'user/disease_intro_for_users.html', {'patient': patient})
 
 class AKIECView(LoginRequiredMixin, TemplateView):
     template_name = 'user/success.html'
@@ -81,6 +107,7 @@ class AKIECView(LoginRequiredMixin, TemplateView):
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'status': 'authenticated'})
         return super().get(request, *args, **kwargs)
+    
 class BCCView(LoginRequiredMixin, TemplateView):
     template_name = 'user/success.html'
     def get(self, request, *args, **kwargs):
@@ -123,6 +150,18 @@ class VASCView(LoginRequiredMixin, TemplateView):
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'status': 'authenticated'})
         return super().get(request, *args, **kwargs)
+
+class DoctorIntroView(TemplateView):
+    template_name = 'user/doctor_intro.html'
+    def get(self, request):
+        # 获取当前用户的patient_id
+        patient_id = request.session.get('patient_id')
+        # 如果存在patient_id，则获取对应的patient对象
+        if patient_id:
+            patient = Patient.objects.get(id=patient_id)
+        else:
+            patient = None
+        return render(request, 'user/doctor_intro.html', {'patient': patient})
 
 # 医生登录
 class DoctorLoginView(FormView):

@@ -38,20 +38,27 @@
           </ul>
           
           <div class="flex-shrink-0 dropdown">
-            <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle show" data-bs-toggle="dropdown" aria-expanded="true">
-                {% comment %} <img src="{% static 'images/default_doctor.jpg' %}" alt="avatar" width="32" height="32" class="rounded-circle"> {% endcomment %}
-                {% comment %} use {{ doctor.avatar}} {% endcomment %}
-                <img src="{{ doctor.avatar.url }}" alt="avatar" width="32" height="32" class="rounded-circle">
-                {% comment %} <img src="/static/images/default_doctor.jpg" alt="avatar" width="32" height="32" class="rounded-circle"> {% endcomment %}
+            {% comment %} 消息提醒 {% endcomment %}
+            <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
+                
+            <a href="#" 
+               class="d-block link-body-emphasis text-decoration-none dropdown-toggle" 
+               data-bs-toggle="dropdown" 
+               aria-expanded="false">
+                <img src="{{ doctor.avatar.url }}" 
+                     alt="avatar" 
+                     width="32" 
+                     height="32" 
+                     class="rounded-circle">
             </a>
-            <ul class="dropdown-menu text-small shadow show" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate3d(0.5px, 34px, 0px);" data-popper-placement="bottom-end">
+            <ul class="dropdown-menu dropdown-menu-end text-small shadow">
               <li><a class="dropdown-item" href="#">个人信息</a></li>
               <li><a class="dropdown-item" href="#">修改密码</a></li>
-              {% comment %} <li><a class="dropdown-item" href="#">诊疗信息</a></li> {% endcomment %}
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href={% url 'doctor_logout'%}>退出系统</a></li>
+              <li><a class="dropdown-item" href={% url 'doctor_logout' %}>退出系统</a></li>
             </ul>
-          </div>
+        </div>
 
         </div>
       </div>

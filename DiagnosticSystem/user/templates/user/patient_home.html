@@ -28,9 +28,9 @@
             <li class="nav-item">
               <a class="nav-link" href={% url 'disease_intro_for_users'%}>皮肤病介绍</a>
             </li>
-            <li class="nav-item">
+            {% comment %} <li class="nav-item">
               <a class="nav-link" href="#">症状查询</a>
-            </li>
+            </li> {% endcomment %}
             <li class="nav-item">
               <a class="nav-link" href="#">AI诊断</a>
             </li>
@@ -40,14 +40,14 @@
           </ul>
           
           <div class="flex-shrink-0 dropdown">
-            <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle show" data-bs-toggle="dropdown" aria-expanded="true">
-                {% comment %} <img src="https://github.com/mdo.png" width="32" height="32" class="rounded-circle"> {% endcomment %}
-                {% comment %} <img src="{{ doctor.avatar.url }}" alt="avatar" width="32" height="32" class="rounded-circle"> {% endcomment %}
-                
+            <a href="#" 
+               class="d-block link-body-emphasis text-decoration-none dropdown-toggle" 
+               data-bs-toggle="dropdown" 
+               aria-expanded="false">
                 <img src="{{ patient.avatar.url }}" alt="avatar" width="32" height="32" class="rounded-circle">
             </a>
-            <ul class="dropdown-menu text-small shadow show" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate3d(0.5px, 34px, 0px);" data-popper-placement="bottom-end">
-              <li><a class="dropdown-item" href="#">个人信息</a></li>
+            <ul class="dropdown-menu dropdown-menu-end text-small shadow">
+              <li><a class="dropdown-item" href={% url 'profile'%}>个人信息</a></li>
               <li><a class="dropdown-item" href="#">修改密码</a></li>
               <li><a class="dropdown-item" href="#">诊疗信息</a></li>
               <li><hr class="dropdown-divider"></li>

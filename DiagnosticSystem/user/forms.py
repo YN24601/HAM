@@ -39,6 +39,49 @@ class PatientLoginForm(forms.Form):
         widget=forms.PasswordInput(attrs={'placeholder': '请输入密码'})
     )
 
+from django.core.validators import RegexValidator
+
+class PatientForm(forms.ModelForm):
+    mobile = forms.CharField(
+        validators=[
+            RegexValidator(
+                regex=r'^1[3-9]\d{9}$',
+                message='请输入有效的11位手机号码'
+            )
+        ],
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'pattern': '^1[3-9]\\d{9}$',
+            'title': '请输入有效的11位手机号码'
+        })
+    )
+
+    class Meta:
+        model = Patient
+        fields = ['idcard', 'name', 'gender', 'mobile', 'email', 'avatar']
+        widgets = {
+            'idcard': forms.TextInput(attrs={'readonly': True, 'class': 'form-control bg-light'}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'gender': forms.Select(attrs={'class': 'form-select'}, choices=[
+                ('M', '男'),
+                ('F', '女'),
+            ]),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'avatar': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*',
+                'id': 'avatarUpload',
+            }),
+        }
+        labels = {
+            'idcard': '身份证号',
+            'name': '姓名',
+            'gender': '性别',
+            'mobile': '手机号',
+            'email': '电子邮箱',
+            'avatar': '头像'
+        }
+
 class DoctorLoginForm(forms.Form):
     idcard = forms.CharField(
         max_length=20, 
