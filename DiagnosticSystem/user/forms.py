@@ -62,7 +62,11 @@ class PatientForm(forms.ModelForm):
         widgets = {
             'idcard': forms.TextInput(attrs={'readonly': True, 'class': 'form-control bg-light'}),
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'gender': forms.Select(attrs={'class': 'form-control bg-light', 'disabled': True}, choices=[
+            # 'gender': forms.Select(attrs={'class': 'form-control bg-light', 'disabled': True}, choices=[
+            #     ('M', '男'),
+            #     ('F', '女'),
+            # ]),
+            'gender': forms.Select(attrs={'class': 'form-select'}, choices=[
                 ('M', '男'),
                 ('F', '女'),
             ]),
@@ -70,7 +74,7 @@ class PatientForm(forms.ModelForm):
             'avatar': forms.FileInput(attrs={
                 'class': 'form-control',
                 'accept': 'image/*',
-                'id': 'avatarUpload',
+                # 'id': 'avatarUpload',
             }),
         }
         labels = {
@@ -103,7 +107,11 @@ class DoctorForm(forms.ModelForm):
         widgets = {
             'docID': forms.TextInput(attrs={'readonly': True, 'class': 'form-control bg-light'}),
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'gender': forms.Select(attrs={'class': 'form-control bg-light', 'disabled': True}, choices=[
+            # 'gender': forms.Select(attrs={'class': 'form-control bg-light', 'disabled': True}, choices=[
+            #     ('M', '男'),
+            #     ('F', '女'),
+            # ]),
+            'gender': forms.Select(attrs={'class': 'form-select'}, choices=[
                 ('M', '男'),
                 ('F', '女'),
             ]),
@@ -113,7 +121,7 @@ class DoctorForm(forms.ModelForm):
             'avatar': forms.FileInput(attrs={
                 'class': 'form-control',
                 'accept': 'image/*',
-                'id': 'avatarUpload',
+                # 'id': 'avatarUpload',
             }),
             'intro': forms.Textarea(attrs={'class': 'form-control'}),
         }

@@ -85,6 +85,10 @@ class PatientProfileView(LoginRequiredMixin, UpdateView):
         # patient = Patient.objects.get(id=patient_id)
         context['patient'] = self.object
         return context
+    # def form_valid(self, form):
+    #     print('上传的文件:', self.request.FILES)  # 检查文件是否上传
+    #     print('表单数据:', form.cleaned_data)    # 检查处理后的数据
+    #     return super().form_valid(form)
 
 # 皮肤病介绍
 class DiseaseViewForUser(TemplateView):

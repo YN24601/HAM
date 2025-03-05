@@ -25,6 +25,7 @@
                                             style="width: 150px; height: 150px;">
                                         <div class="mt-3">
                                             {{ form.avatar }}
+                                            {% comment %} <input type="file" class="form-control" id="avatarUpload" accept="image/*"> {% endcomment %}
                                         </div>
                                         {{ form.avatar.errors }}
                                     </div>
@@ -132,8 +133,9 @@
     </style>
 
     <script>
-        // 头像上传预览（确保ID匹配）
-        document.getElementById('id_avatar').addEventListener('change', function(e) {
+
+        {% comment %} document.getElementById('avatarUpload').addEventListener('change', function(e) { {% endcomment %}
+        document.querySelector('input[name="avatar"]').addEventListener('change', function(e) {
             const reader = new FileReader();
             reader.onload = function() {
                 document.querySelector('.img-thumbnail').src = reader.result;
@@ -142,6 +144,4 @@
         });
     </script>
 </main>
-
-<!-- 其他脚本保持不变 -->
 {% endblock content %}
