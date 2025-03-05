@@ -9,7 +9,7 @@
     {% comment %} 
     上一级文件夹下的/statics/style.css
     {% endcomment %}
-    <link rel="stylesheet" href="style.css">
+    {% comment %} <link rel="stylesheet" href="style.css"> {% endcomment %}
     <title>助肤康</title>
 </head>
 <body>
@@ -35,7 +35,7 @@
               <a class="nav-link" href="#">AI诊断</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">医师团队</a>
+              <a class="nav-link" href={% url 'doctor_intro_for_users' %}>医师团队</a>
             </li>
           </ul>
           

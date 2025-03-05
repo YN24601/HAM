@@ -88,6 +88,23 @@ class Doctor(models.Model):
         from django.contrib.auth.hashers import check_password
         return check_password(raw_password, self.password)
 
+    def getBirthday(self):
+        # 转为datetime格式
+        if self.birthday:
+            return datetime.strptime(str(self.birthday), '%Y-%m-%d').date()
+        return None
+
+    def getAge(self):
+        """根据出生日期获取年龄"""
+        if self.birthday:
+            today = datetime.today().date()
+            age = today.year - self.birthday.year
+            # 如果今年生日还没过，年龄减一
+            if (today.month, today.day) < (self.birthday.month, self.birthday.day):
+                age -= 1
+            return age
+        return None
+
     def __str__(self):
         return f"Dr. {self.name} ({self.title})"
 

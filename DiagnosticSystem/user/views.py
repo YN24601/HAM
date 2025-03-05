@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.generic import TemplateView, CreateView, FormView, UpdateView
 from .models import Patient, Doctor
 from .forms import PatientCreationForm, PatientLoginForm, PatientForm
-from .forms import DoctorLoginForm
+from .forms import DoctorLoginForm, DoctorForm
 from DiagnosticSystem.mixins import LoginRequiredMixin
 
 
@@ -179,33 +179,26 @@ class DoctorLoginView(FormView):
             # 检查密码是否匹配
             if doctor.check_password(password):
                 # 登录成功，将用户信息存入 session
-                self.request.session['doctor_id'] = doctor.docID
+                self.request.session['doctor_id'] = doctor.id
                 self.request.session['doctor_name'] = doctor.name
+                # print(doctor.id, doctor.docID, doctor.name )
                 # 跳转到登录后页面
                 return HttpResponseRedirect(reverse('doctor_home'))
             else:
                 # 密码错误
                 form.add_error(None, '密码错误，请重新输入')
                 return self.form_invalid(form)
-        except Patient.DoesNotExist:
+        except Doctor.DoesNotExist:
             # 用户不存在
             form.add_error(None, '医生编号不存在，请检查后重试')
             return self.form_invalid(form)
 
-class DoctorHomeView(TemplateView):
+class DoctorHomeView(LoginRequiredMixin, TemplateView):
     template_name = 'doctor/doctor_home.html'
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     context['patient_name'] = self.request.session.get('patient_name', '游客')
-    #     return context
     def get(self, request):
         doctor_id = request.session.get('doctor_id')
-        if doctor_id:
-            doctor = Doctor.objects.get(docID=doctor_id)
-        else:
-            doctor = None
+        doctor = Doctor.objects.get(id=doctor_id)
         return render(request, 'doctor/doctor_home.html', {'doctor': doctor})
-
 
 # 用户注销
 def DoctorLogout(request):
@@ -213,3 +206,22 @@ def DoctorLogout(request):
     request.session.flush()
     # return HttpResponseRedirect(reverse('user_login'))
     return HttpResponseRedirect(reverse('home'))
+           
+from django.shortcuts import get_object_or_404
+from django.contrib import messages
+
+class DoctorProfileView(LoginRequiredMixin, UpdateView):
+    template_name = 'doctor/doctor_profile.html'
+    form_class = DoctorForm
+    
+    def get_object(self):
+        doctor_id = self.request.session.get('doctor_id')
+        return Doctor.objects.get(id=doctor_id)
+    
+    def get_success_url(self):
+        return reverse('doctor_profile') 
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['doctor'] = self.object
+        return context

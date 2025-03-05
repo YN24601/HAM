@@ -1,5 +1,5 @@
 from django import forms
-from .models import Patient
+from .models import Patient, Doctor
 
 class PatientCreationForm(forms.ModelForm):
     password1 = forms.CharField(label="密码", widget=forms.PasswordInput, min_length=8)
@@ -62,7 +62,7 @@ class PatientForm(forms.ModelForm):
         widgets = {
             'idcard': forms.TextInput(attrs={'readonly': True, 'class': 'form-control bg-light'}),
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'gender': forms.Select(attrs={'class': 'form-select'}, choices=[
+            'gender': forms.Select(attrs={'class': 'form-control bg-light', 'disabled': True}, choices=[
                 ('M', '男'),
                 ('F', '女'),
             ]),
@@ -96,4 +96,35 @@ class DoctorLoginForm(forms.Form):
         widget=forms.PasswordInput(attrs={'placeholder': '请输入密码'})
     )
 
+class DoctorForm(forms.ModelForm):
+    class Meta:
+        model = Doctor
+        fields = ['docID', 'name', 'gender', 'title', 'email', 'birthday', 'avatar', 'intro']
+        widgets = {
+            'docID': forms.TextInput(attrs={'readonly': True, 'class': 'form-control bg-light'}),
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'gender': forms.Select(attrs={'class': 'form-control bg-light', 'disabled': True}, choices=[
+                ('M', '男'),
+                ('F', '女'),
+            ]),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'birthday': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'avatar': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*',
+                'id': 'avatarUpload',
+            }),
+            'intro': forms.Textarea(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'docID': '医生编号',
+            'name': '姓名',
+            'gender': '性别',
+            'title': '职称',
+            'email': '电子邮箱',
+            'birthday': '出生日期',
+            'avatar': '头像',
+            'intro': '简介',
+        }
 

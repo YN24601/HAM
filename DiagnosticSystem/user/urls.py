@@ -16,12 +16,12 @@ urlpatterns = [
     path('disease_intro/nv', views.NVView.as_view(), name='nv'),
     path('disease_intro/mel', views.MELView.as_view(), name='mel'),
     path('disease_intro/vasc', views.VASCView.as_view(), name='vasc'),
-    path('doctor_intro/', views.DoctorIntroView.as_view(), name="doctor_intro"),
+    path('doctor_intro/', views.DoctorIntroView.as_view(), name="doctor_intro_for_users"),
     # path('doctor_intro/<int:pk>/', views.DoctorDetailView.as_view(), name="doctor_detail"),
-
     path("profile/", views.PatientProfileView.as_view(), name="profile"),
 
     path('doctor_login/', views.DoctorLoginView.as_view(), name='doctor_login'),
     path('doctor_home/', views.DoctorHomeView.as_view(), name='doctor_home'),
     path('doctor_logout/', views.DoctorLogout, name='doctor_logout'),
+    path('doctor_profile/', views.DoctorProfileView.as_view(), name='doctor_profile'),
 ]
