@@ -24,4 +24,8 @@ urlpatterns = [
     path('doctor_home/', views.DoctorHomeView.as_view(), name='doctor_home'),
     path('doctor_logout/', views.DoctorLogout, name='doctor_logout'),
     path('doctor_profile/', views.DoctorProfileView.as_view(), name='doctor_profile'),
+    path('doctor_schedule/', views.DoctorScheduleView.as_view(), name='doctor_schedule'),
+    path('doctor_schedule/delete/<int:pk>/', views.DoctorScheduleDelete, name='doctor_schedule_delete'),
+    path('doctor_schedule/edit/<int:pk>/', views.DoctorScheduleEditView.as_view(), name='doctor_schedule_edit'),
+
 ]

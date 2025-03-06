@@ -1,5 +1,5 @@
 from django import forms
-from .models import Patient, Doctor
+from .models import Patient, Doctor, DoctorSchedule
 
 class PatientCreationForm(forms.ModelForm):
     password1 = forms.CharField(label="密码", widget=forms.PasswordInput, min_length=8)
@@ -136,3 +136,14 @@ class DoctorForm(forms.ModelForm):
             'intro': '简介',
         }
 
+# create shchedule
+class DoctorScheduleForm(forms.ModelForm):
+    class Meta:
+        model = DoctorSchedule
+        fields = ['date', 'start_time', 'end_time', 'max_patients']
+        # fields = ['date', 'start_time', 'end_time', 'max_patients', 'current_patients']
+
+# class DoctorScheduleUpdateForm(forms.ModelForm):
+#     class Meta:
+#         model = DoctorSchedule
+        # fields = ['date', 'start_time', 'end_time', 'max_patients', 'current_patients']

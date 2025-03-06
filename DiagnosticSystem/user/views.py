@@ -2,9 +2,9 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.generic import TemplateView, CreateView, FormView, UpdateView
-from .models import Patient, Doctor
+from .models import Patient, Doctor, DoctorSchedule
 from .forms import PatientCreationForm, PatientLoginForm, PatientForm
-from .forms import DoctorLoginForm, DoctorForm
+from .forms import DoctorLoginForm, DoctorForm, DoctorScheduleForm
 from DiagnosticSystem.mixins import LoginRequiredMixin
 
 
@@ -210,10 +210,7 @@ def DoctorLogout(request):
     request.session.flush()
     # return HttpResponseRedirect(reverse('user_login'))
     return HttpResponseRedirect(reverse('home'))
-           
-from django.shortcuts import get_object_or_404
-from django.contrib import messages
-
+    
 class DoctorProfileView(LoginRequiredMixin, UpdateView):
     template_name = 'doctor/doctor_profile.html'
     form_class = DoctorForm
@@ -229,3 +226,79 @@ class DoctorProfileView(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['doctor'] = self.object
         return context
+
+
+class DoctorScheduleView(LoginRequiredMixin, TemplateView):
+    template_name = 'doctor/doctor_schedule.html'
+
+    def get(self, request):
+        doctor_id = request.session.get('doctor_id')
+        doctor = Doctor.objects.get(id=doctor_id)
+        
+        # 处理筛选条件
+        available = request.GET.get('available')
+        if available is not None:
+            available = int(available)
+            schedules = DoctorSchedule.objects.filter(doctor=doctor, is_available=available).order_by('date', 'start_time')
+        else:
+            schedules = DoctorSchedule.objects.filter(doctor=doctor).order_by('date', 'start_time')
+        
+        # 创建表单实例
+        form = DoctorScheduleForm()
+        
+        return render(request, self.template_name, {
+            'schedules': schedules,
+            'doctor': doctor,
+            'form': form
+        })
+
+    def post(self, request):
+        doctor_id = request.session.get('doctor_id')
+        doctor = Doctor.objects.get(id=doctor_id)
+        
+        form = DoctorScheduleForm(request.POST)
+        print('form:', form)
+        if form.is_valid():
+            schedule = form.save(commit=False)
+            schedule.doctor = doctor
+            schedule.save()
+            return redirect('doctor_schedule')
+        
+        # 如果表单无效，重新渲染页面并显示错误信息
+        schedules = DoctorSchedule.objects.filter(doctor=doctor).order_by('date', 'start_time')
+        # print('schedules:', schedules)
+        return render(request, self.template_name, {
+            'schedules': schedules,
+            'doctor': doctor,
+            'form': form
+        })
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import UpdateView
+from django.shortcuts import get_object_or_404
+from .models import DoctorSchedule
+from .forms import DoctorScheduleForm
+
+class DoctorScheduleEditView(LoginRequiredMixin, UpdateView):
+    model = DoctorSchedule
+    form_class = DoctorScheduleForm
+    template_name = 'doctor/doctor_schedule_edit.html'
+    context_object_name = 'schedule'
+    success_url = reverse_lazy('doctor_schedule')
+
+    def form_valid(self, form):
+        schedule = form.instance
+        # 检查 max_patients 是否小于已预约的患者人数
+        if form.cleaned_data['max_patients'] < schedule.current_patients:
+            form.add_error('max_patients', '最大患者数不能小于已预约的患者人数')
+            return self.form_invalid(form)
+        return super().form_valid(form)
+
+def DoctorScheduleDelete(request, pk):
+    schedule = DoctorSchedule.objects.get(id=pk)
+    schedule.delete()
+    return redirect('doctor_schedule')
