@@ -3,9 +3,11 @@ from django.urls import reverse_lazy, reverse
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.generic import TemplateView, CreateView, FormView, UpdateView
 from .models import Patient, Doctor, DoctorSchedule
-from .forms import PatientCreationForm, PatientLoginForm, PatientForm
+from .forms import PatientCreationForm, PatientLoginForm, PatientForm, DoctorFilterForm
 from .forms import DoctorLoginForm, DoctorForm, DoctorScheduleForm
 from DiagnosticSystem.mixins import LoginRequiredMixin
+from django.db.models import Q
+from datetime import date, timedelta
 
 
 # 用户注册
@@ -155,17 +157,83 @@ class VASCView(LoginRequiredMixin, TemplateView):
             return JsonResponse({'status': 'authenticated'})
         return super().get(request, *args, **kwargs)
 
-class DoctorIntroView(TemplateView):
-    template_name = 'user/doctor_intro.html'
-    def get(self, request):
-        # 获取当前用户的patient_id
-        patient_id = request.session.get('patient_id')
-        # 如果存在patient_id，则获取对应的patient对象
+
+class DoctorListView(TemplateView):
+    template_name = 'user/doctor_list.html'
+    
+    
+    def get_context_data(self,**kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # 获取所有医生
+        doctors = Doctor.objects.all()
+
+        # 初始化表单
+        form = DoctorFilterForm(self.request.GET or None)
+
+        if form.is_valid():
+            # 获取表单数据
+            name = form.cleaned_data.get('name')
+            title = form.cleaned_data.get('title')
+            gender = form.cleaned_data.get('gender')
+            min_age = form.cleaned_data.get('min_age')
+            max_age = form.cleaned_data.get('max_age')
+            sort_by = form.cleaned_data.get('sort_by')
+
+            # 构建查询条件
+            query = Q()
+            if name:
+                query &= Q(name__icontains=name)
+            if title:
+                query &= Q(title__icontains=title)
+            if gender:
+                query &= Q(gender=gender)
+
+            # 年龄范围筛选
+            if min_age or max_age:
+                today = date.today()
+                if min_age:
+                    max_birthday = today - timedelta(days=min_age * 365)
+                    query &= Q(birthday__lte=max_birthday)
+                if max_age:
+                    min_birthday = today - timedelta(days=(max_age + 1) * 365)
+                    query &= Q(birthday__gt=min_birthday)
+
+            # 应用查询条件
+            doctors = doctors.filter(query)
+
+            # 排序
+            if sort_by:
+                doctors = doctors.order_by(sort_by)
+
+        # 将医生和表单添加到上下文中
+        context['doctors'] = doctors
+        context['form'] = form
+        patient_id = self.request.session.get('patient_id')
+        context['patient'] = Patient.objects.get(id=patient_id)
+        return context
+
+class DoctorDetailView(TemplateView):
+    template_name = 'user/doctor_detail.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 获取医生ID
+        doctor_id = kwargs.get('pk')
+        # 获取医生对象
+        doctor = Doctor.objects.get(id=doctor_id)
+        # 获取医生的排班信息
+        schedules = DoctorSchedule.objects.filter(doctor=doctor).order_by('date', 'start_time')
+        # 将医生和排班信息添加到上下文中
+        context['doctor'] = doctor
+        context['schedules'] = schedules
+        # 获取当前患者信息（如果有）
+        patient_id = self.request.session.get('patient_id')
         if patient_id:
-            patient = Patient.objects.get(id=patient_id)
-        else:
-            patient = None
-        return render(request, 'user/doctor_intro.html', {'patient': patient})
+            context['patient'] = Patient.objects.get(id=patient_id)
+        
+        return context
+
+######################################### DOCTOR ############################################
 
 # 医生登录
 class DoctorLoginView(FormView):
@@ -276,12 +344,8 @@ class DoctorScheduleView(LoginRequiredMixin, TemplateView):
 
 from django.shortcuts import render, get_object_or_404, redirect
 
-from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import UpdateView
-from django.shortcuts import get_object_or_404
-from .models import DoctorSchedule
-from .forms import DoctorScheduleForm
+
+
 
 class DoctorScheduleEditView(LoginRequiredMixin, UpdateView):
     model = DoctorSchedule

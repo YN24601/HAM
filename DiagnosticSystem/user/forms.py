@@ -143,6 +143,32 @@ class DoctorScheduleForm(forms.ModelForm):
         fields = ['date', 'start_time', 'end_time', 'max_patients']
         # fields = ['date', 'start_time', 'end_time', 'max_patients', 'current_patients']
 
+# 假设 gender_choices 是这样定义的
+gender_choices = [
+    ('', '不限'),  # 添加 "不限" 选项
+    ('M', '男'),
+    ('F', '女'),
+]
+
+class DoctorFilterForm(forms.Form):
+    name = forms.CharField(label='姓名', required=False)
+    title = forms.CharField(label='职称', required=False)
+    gender = forms.ChoiceField(label='性别', choices=gender_choices, required=False)
+    min_age = forms.IntegerField(label='最小年龄', required=False)
+    max_age = forms.IntegerField(label='最大年龄', required=False)
+
+    # 排序选项
+    SORT_CHOICES = [
+        ('', '默认排序'),
+        ('name', '姓名升序'),
+        ('-name', '姓名降序'),
+        ('title', '职称升序'),
+        ('-title', '职称降序'),
+        ('birthday', '年龄升序'),
+        ('-birthday', '年龄降序'),
+    ]
+    sort_by = forms.ChoiceField(label='排序方式', choices=SORT_CHOICES, required=False)
+
 # class DoctorScheduleUpdateForm(forms.ModelForm):
 #     class Meta:
 #         model = DoctorSchedule
