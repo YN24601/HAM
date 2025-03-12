@@ -150,7 +150,7 @@ class Appointment(models.Model):
     updated_at = models.DateTimeField('更新时间', auto_now=True, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.patient} 预约 {self.doctor} - {self.status}"
+        return f"{self.patient} 预约 {self.doctor_schedule.doctor} - {self.status}"
     
     class Meta:
         verbose_name = '预约记录'

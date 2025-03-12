@@ -1,12 +1,17 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
+from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.views.generic import TemplateView, CreateView, FormView, UpdateView
-from .models import Patient, Doctor, DoctorSchedule
+from django.views.generic import TemplateView, CreateView, FormView, UpdateView, ListView
+from django.db.models import Q
+
+from .models import Patient, Doctor, DoctorSchedule, Appointment, AppointmentStatus
 from .forms import PatientCreationForm, PatientLoginForm, PatientForm, DoctorFilterForm
+CUSTOM_MESSAGE_LEVEL = 10  # 自定义消息级别
+
 from .forms import DoctorLoginForm, DoctorForm, DoctorScheduleForm
 from DiagnosticSystem.mixins import LoginRequiredMixin
-from django.db.models import Q
+
 from datetime import date, timedelta
 
 
@@ -157,11 +162,8 @@ class VASCView(LoginRequiredMixin, TemplateView):
             return JsonResponse({'status': 'authenticated'})
         return super().get(request, *args, **kwargs)
 
-
 class DoctorListView(TemplateView):
     template_name = 'user/doctor_list.html'
-    
-    
     def get_context_data(self,**kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -223,15 +225,86 @@ class DoctorDetailView(TemplateView):
         doctor = Doctor.objects.get(id=doctor_id)
         # 获取医生的排班信息
         schedules = DoctorSchedule.objects.filter(doctor=doctor).order_by('date', 'start_time')
-        # 将医生和排班信息添加到上下文中
+        # 将医生和排班信息
         context['doctor'] = doctor
         context['schedules'] = schedules
-        # 获取当前患者信息（如果有）
+        # 当前患者信息
         patient_id = self.request.session.get('patient_id')
+        patient = Patient.objects.get(id=patient_id)
         if patient_id:
-            context['patient'] = Patient.objects.get(id=patient_id)
-        
+            context['patient'] = patient
+        # 患者已预约的排班
+        user_appointment = Appointment.objects.filter(patient=patient).exclude(status__in=['cancelled', 'completed']).first()
+        context['user_appointment'] = user_appointment
+        print(user_appointment)
         return context
+
+def book_appointment(request, pk):
+    schedule = get_object_or_404(DoctorSchedule, id=pk)
+
+    patient_id = request.session.get('patient_id')
+    patient = Patient.objects.get(id=patient_id)
+
+    # 检查用户是否已经预约了该排班
+    existing_appointment = Appointment.objects.filter(patient=patient).exclude(status__in=['cancelled', 'completed']).exists()
+    if existing_appointment:
+        # messages.warning(request, CUSTOM_MESSAGE_LEVEL, '您已经预约了该时间段，不可重复预约。')
+        messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '已存在预约时间段，不可重复预约。')
+        return redirect('doctor_detail', pk=schedule.doctor.id)
+
+    # 检查排班是否还可预约
+    if not schedule.avaliable():
+        messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '该时间段已满，无法预约。')
+        # messages.warning(request, CUSTOM_MESSAGE_LEVEL, '该时间段已满，无法预约。')
+        return redirect('doctor_detail', pk=schedule.doctor.id)
+
+    # 创建新的预约记录
+    Appointment.objects.create(
+        patient=patient,
+        doctor_schedule=schedule,
+        status='pending'
+    )
+
+    # messages.success(request, CUSTOM_MESSAGE_LEVEL, '预约成功，等待医生确认。')
+    messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '预约成功，等待医生确认。')
+
+    # 打印消息，调试用
+    if messages.get_messages(request):
+        print(list(messages.get_messages(request)))
+    else:
+        print('No messages')
+    return redirect('doctor_detail', pk=schedule.doctor.id)
+
+def cancel_appointment(request, pk):
+    patient_id = request.session.get('patient_id')
+    patient = Patient.objects.get(id=patient_id)
+    appointment = get_object_or_404(Appointment, id=pk, patient=patient)
+    
+    if appointment.status == 'pending':
+        appointment.status = 'cancelled'
+        appointment.save()
+        messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '预约已取消')
+    else:
+        messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '无法取消该预约')
+    
+    return redirect('appointment_record')
+
+class AppointmentRecordView(ListView):
+    model = Appointment
+    template_name = 'user/appointment_record.html'  # 模板路径
+    context_object_name = 'appointments'  # 上下文变量名
+    def get_context_data(self,**kwargs):
+        context = super().get_context_data(**kwargs)
+        patient_id = self.request.session.get('patient_id')
+        patient = Patient.objects.get(id=patient_id)
+        context['patient'] = patient
+        return context
+        
+    def get_queryset(self):
+        # 获取当前登录用户的预约记录
+        patient_id = self.request.session.get('patient_id')
+        patient = Patient.objects.get(id=patient_id)
+        return Appointment.objects.filter(patient=patient).order_by('-created_at')
 
 ######################################### DOCTOR ############################################
 

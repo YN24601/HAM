@@ -1,5 +1,10 @@
 {% extends "user/patient_home.html" %}
 {% load static %}
+{% for message in messages %}
+    {% if message.level == 10 %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endif %}
+{% endfor %}
 {% block content %}
 
 <main>
@@ -67,8 +72,15 @@
                                             </td>
                                             <td>
                                                 {% if schedule.avaliable %}
-                                                    <a href="#" class="btn btn-primary btn-sm">预约</a>
+                                                    {% if user_appointment and user_appointment.doctor_schedule.id == schedule.id %}
+                                                        <!-- 如果患者已预约该排班 -->
+                                                        <a href="{% url 'cancel_appointment' user_appointment.id %}" class="btn btn-danger btn-sm">取消预约</a>                                                           
+                                                    {% else %}
+                                                        <!-- 如果患者未预约该排班 -->
+                                                        <a href="{% url 'book_appointment' schedule.id %}" class="btn btn-primary btn-sm">预约</a>
+                                                    {% endif %}
                                                 {% else %}
+                                                    <!-- 如果排班已满 -->
                                                     <button class="btn btn-secondary btn-sm" disabled>已满</button>
                                                 {% endif %}
                                             </td>
