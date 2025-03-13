@@ -1,0 +1,114 @@
+{% extends "user/patient_home.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% block content %}
+
+<main>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <!-- 预约筛选卡片 -->
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">预约时间段筛选</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- 筛选表单 -->
+                        <form method="get" class="mb-4">
+                            <div class="row g-3">
+                                <!-- 医生姓名筛选 -->
+                                <div class="col-md-3">
+                                    <label class="form-label">{{ form.name.label}}</label>
+                                    {{ form.name|add_class:"form-control" }}
+                                </div>
+                                <!-- 医生性别筛选 -->
+                                <div class="col-md-2">
+                                    <label class="form-label">{{ form.gender.label}}</label>
+                                    {{ form.gender|add_class:"form-control" }}
+                                </div>
+                                <!-- 医生职称筛选 -->
+                                <div class="col-md-2">
+                                    <label class="form-label">{{ form.title.label }}</label>
+                                    {{  form.title|add_class:"form-control"}}
+                                </div>
+                                <!-- 日期筛选 -->
+                                <div class="col-md-2">
+                                    <label class="form-label">{{ form.date.label}}</label>
+                                    {{ form.date|add_class:"form-control" }}
+                                </div>
+                                <!-- 时间筛选 -->
+                                <div class="col-md-2">
+                                    <label class="form-label">{{ form.time.label }} </label>
+                                    {{ form.time|add_class:"form-control" }}
+                                </div>
+                                <!-- 筛选按钮 -->
+                                <div class="col-md-1 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-filter"></i> 筛选
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- 预约时间段列表 -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>医生姓名</th>
+                                        <th>职称</th>
+                                        <th>性别</th>
+                                        <th>日期</th>
+                                        <th>开始时间</th>
+                                        <th>结束时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for schedule in schedules %}
+                                    <tr>
+                                        <td>{{ schedule.doctor.name }}</td>
+                                        <td>{{ schedule.doctor.title }}</td>
+                                        <td>{{ schedule.doctor.get_gender_display }}</td>
+                                        <td>{{ schedule.date }}</td>
+                                        <td>{{ schedule.start_time }}</td>
+                                        <td>{{ schedule.end_time }}</td>
+                                        <td>
+                                            {% if schedule.avaliable %}
+                                                <span class="badge bg-success">可预约</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">已满</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if schedule.avaliable %}
+                                                {% if user_appointment and user_appointment.doctor_schedule.id == schedule.id %}
+                                                    <!-- 如果患者已预约该排班 -->
+                                                    <a href="{% url 'cancel_appointment' user_appointment.id %}" class="btn btn-danger btn-sm">取消预约</a>
+                                                {% else %}
+                                                    <!-- 如果患者未预约该排班 -->
+                                                    <a href="{% url 'book_appointment' schedule.id %}" class="btn btn-primary btn-sm">预约</a>
+                                                {% endif %}
+                                            {% else %}
+                                                <!-- 如果排班已满 -->
+                                                <button class="btn btn-secondary btn-sm" disabled>已满</button>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="8" class="text-center">暂无符合条件的预约时间段</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock content %}

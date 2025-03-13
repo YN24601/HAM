@@ -64,8 +64,6 @@ class Patient(models.Model):
         verbose_name = '患者'
         verbose_name_plural = verbose_name
 
-
-
 class Doctor(models.Model):
     docID = models.CharField('医生编号', max_length=20, unique=True, null=False, blank=False)
     name = models.CharField('姓名', max_length=50, blank=False)

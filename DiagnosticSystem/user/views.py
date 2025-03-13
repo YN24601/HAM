@@ -6,7 +6,7 @@ from django.views.generic import TemplateView, CreateView, FormView, UpdateView,
 from django.db.models import Q
 
 from .models import Patient, Doctor, DoctorSchedule, Appointment, AppointmentStatus
-from .forms import PatientCreationForm, PatientLoginForm, PatientForm, DoctorFilterForm
+from .forms import PatientCreationForm, PatientLoginForm, PatientForm, DoctorFilterForm, ScheduleFilterForm
 CUSTOM_MESSAGE_LEVEL = 10  # 自定义消息级别
 
 from .forms import DoctorLoginForm, DoctorForm, DoctorScheduleForm
@@ -305,6 +305,52 @@ class AppointmentRecordView(ListView):
         patient_id = self.request.session.get('patient_id')
         patient = Patient.objects.get(id=patient_id)
         return Appointment.objects.filter(patient=patient).order_by('-created_at')
+
+class ScheduleListView(TemplateView):
+    template_name = 'user/schedule_list.html'  # 模板路径
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # 获取登录用户
+        patient_id = self.request.session.get('patient_id')
+        patient = Patient.objects.get(id=patient_id)
+        context['patient'] = patient
+
+        # 初始化表单
+        form = ScheduleFilterForm(self.request.GET or None)
+        if form.is_valid():
+            name = form.cleaned_data.get('name')
+            gender = form.cleaned_data.get('gender')
+            title = form.cleaned_data.get('title')
+            date = form.cleaned_data.get('date')
+            time = form.cleaned_data.get('time')
+            print("name: ", name)
+            print("gender: ", gender)
+            print("title: ", title)
+            print("date: ", date)
+            print("time: ", time)
+
+            # 根据表单数据过滤医生
+            query = Q()
+            if name:
+                query &= Q(doctor__name__icontains=name)
+            if gender:
+                query &= Q(doctor__gender=gender)
+            if title:
+                query &= Q(doctor__title__icontains=title)
+            if date:
+                query &= Q(date=date)
+            if time:
+                query &= Q(start_time__lte=time) & Q(end_time__gte=time)
+                       
+            schedules = DoctorSchedule.objects.filter(query)
+            
+            
+            context['schedules'] = schedules
+            context['form'] = form
+            
+        return context
+
 
 ######################################### DOCTOR ############################################
 

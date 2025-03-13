@@ -169,6 +169,19 @@ class DoctorFilterForm(forms.Form):
     ]
     sort_by = forms.ChoiceField(label='排序方式', choices=SORT_CHOICES, required=False)
 
+class ScheduleFilterForm(forms.Form):
+    name = forms.CharField(label='姓名', required=False)
+    gender = forms.ChoiceField(label='性别', choices=gender_choices, required=False)
+    title = forms.CharField(label='职称', required=False)
+    # min_age = forms.IntegerField(label='最小年龄', required=False)
+    # max_age = forms.IntegerField(label='最大年龄', required=False)
+    date = forms.DateField(label='日期', required=False)
+    time = forms.TimeField(label='时间', required=False)
+
+
+
+
+
 # class DoctorScheduleUpdateForm(forms.ModelForm):
 #     class Meta:
 #         model = DoctorSchedule
