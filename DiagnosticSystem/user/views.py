@@ -4,14 +4,11 @@ from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.generic import TemplateView, CreateView, FormView, UpdateView, ListView
 from django.db.models import Q
-
+CUSTOM_MESSAGE_LEVEL = 10  # 自定义消息级别
 from .models import Patient, Doctor, DoctorSchedule, Appointment, AppointmentStatus
 from .forms import PatientCreationForm, PatientLoginForm, PatientForm, DoctorFilterForm, ScheduleFilterForm
-CUSTOM_MESSAGE_LEVEL = 10  # 自定义消息级别
-
 from .forms import DoctorLoginForm, DoctorForm, DoctorScheduleForm
 from DiagnosticSystem.mixins import LoginRequiredMixin
-
 from datetime import date, timedelta
 
 
@@ -214,7 +211,6 @@ class DoctorListView(TemplateView):
         patient_id = self.request.session.get('patient_id')
         context['patient'] = Patient.objects.get(id=patient_id)
         return context
-
 class DoctorDetailView(TemplateView):
     template_name = 'user/doctor_detail.html'
     def get_context_data(self, **kwargs):
@@ -324,11 +320,11 @@ class ScheduleListView(TemplateView):
             title = form.cleaned_data.get('title')
             date = form.cleaned_data.get('date')
             time = form.cleaned_data.get('time')
-            print("name: ", name)
-            print("gender: ", gender)
-            print("title: ", title)
-            print("date: ", date)
-            print("time: ", time)
+            # print("name: ", name)
+            # print("gender: ", gender)
+            # print("title: ", title)
+            # print("date: ", date)
+            # print("time: ", time)
 
             # 根据表单数据过滤医生
             query = Q()
@@ -342,17 +338,25 @@ class ScheduleListView(TemplateView):
                 query &= Q(date=date)
             if time:
                 query &= Q(start_time__lte=time) & Q(end_time__gte=time)
+
+            query &= Q(is_available=True)
                        
             schedules = DoctorSchedule.objects.filter(query)
             
             
             context['schedules'] = schedules
             context['form'] = form
-            
+        else:
+            query = Q()
+            query &= Q(is_available=True)
+            schedules = DoctorSchedule.objects.filter(query)
+            context['schedules'] = schedules
+            context['form'] = form
         return context
 
-
+#############################################################################################
 ######################################### DOCTOR ############################################
+#############################################################################################
 
 # 医生登录
 class DoctorLoginView(FormView):
@@ -414,7 +418,6 @@ class DoctorProfileView(LoginRequiredMixin, UpdateView):
         context['doctor'] = self.object
         return context
 
-
 class DoctorScheduleView(LoginRequiredMixin, TemplateView):
     template_name = 'doctor/doctor_schedule.html'
 
@@ -459,12 +462,6 @@ class DoctorScheduleView(LoginRequiredMixin, TemplateView):
             'doctor': doctor,
             'form': form
         })
-
-
-from django.shortcuts import render, get_object_or_404, redirect
-
-
-
 
 class DoctorScheduleEditView(LoginRequiredMixin, UpdateView):
     model = DoctorSchedule
