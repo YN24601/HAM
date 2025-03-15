@@ -260,6 +260,7 @@ def book_appointment(request, pk):
         doctor_schedule=schedule,
         status='pending'
     )
+    schedule.book()
 
     # messages.success(request, CUSTOM_MESSAGE_LEVEL, '预约成功，等待医生确认。')
     messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '预约成功，等待医生确认。')
@@ -279,6 +280,7 @@ def cancel_appointment(request, pk):
     if appointment.status == 'pending':
         appointment.status = 'cancelled'
         appointment.save()
+        appointment.doctor_schedule.cancel()
         messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '预约已取消')
     else:
         messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '无法取消该预约')
@@ -342,8 +344,6 @@ class ScheduleListView(TemplateView):
             query &= Q(is_available=True)
                        
             schedules = DoctorSchedule.objects.filter(query)
-            
-            
             context['schedules'] = schedules
             context['form'] = form
         else:

@@ -128,6 +128,16 @@ class DoctorSchedule(models.Model):
         is_available = self.max_patients > self.current_patients
         return is_available
     
+    def book(self):
+        self.current_patients += 1
+        self.is_available = self.max_patients > self.current_patients
+        self.save()
+
+    def cancel(self):
+        self.current_patients -= 1
+        self.is_available = self.max_patients > self.current_patients
+        self.save()
+
     class Meta:
         verbose_name = '医生排班'
         verbose_name_plural = verbose_name

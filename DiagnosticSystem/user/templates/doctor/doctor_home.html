@@ -86,20 +86,21 @@
     <div class="row align-items-md-stretch">
       <div class="col-md-6">
         <div class="h-100 p-5 text-bg-dark rounded-3">
-          <h2>预约管理</h2>
+          <h2>接诊</h2>
           <p>您好，{{ doctor.name }}医生。</p>
-          <p>管理您的预约信息，查看预约状态。</p>
-          <a href={% url 'doctor_schedule'%} class="btn btn-outline-light" type="button">查看预约</a>
+          <p>管理您的接诊信息，查看接诊状态。</p>
+          <a href="#" class="btn btn-outline-light" type="button">查看接诊</a>
         </div>
       </div>
       <div class="col-md-6">
         <div class="h-100 p-5 bg-light border rounded-3">
-          <h2>接诊</h2>
+          <h2>预约管理</h2>
           <p>您好，{{ doctor.name }}医生。</p>
-          <p>管理您的接诊信息，查看接诊状态。</p>
-          <a href="#" class="btn btn-outline-secondary" type="button">查看接诊</a>
+          <p>管理您的预约信息，查看预约状态。</p>
+          <a href={% url 'doctor_schedule'%} class="btn btn-outline-secondary" type="button">查看预约</a>
         </div>
       </div>
+      
     </div>
     <br>
     <br>

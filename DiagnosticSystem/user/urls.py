@@ -25,9 +25,8 @@ urlpatterns = [
     path('appointment_record/', views.AppointmentRecordView.as_view(), name='appointment_record'),
     path('cancel_appointment/<int:pk>/', views.cancel_appointment, name='cancel_appointment'),
     path('schedule_list/', views.ScheduleListView.as_view(), name='schedule_list'),
-
-
     path("profile/", views.PatientProfileView.as_view(), name="profile"),
+#-----------------------------------------------------------------------------
     path('doctor_login/', views.DoctorLoginView.as_view(), name='doctor_login'),
     path('doctor_home/', views.DoctorHomeView.as_view(), name='doctor_home'),
     path('doctor_logout/', views.DoctorLogout, name='doctor_logout'),
