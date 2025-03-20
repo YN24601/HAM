@@ -1,5 +1,5 @@
 from django import forms
-from .models import Patient, Doctor, DoctorSchedule
+from .models import Patient, Doctor, DoctorSchedule, Appointment, AppointmentStatus
 
 class PatientCreationForm(forms.ModelForm):
     password1 = forms.CharField(label="密码", widget=forms.PasswordInput, min_length=8)
@@ -142,6 +142,12 @@ class DoctorScheduleForm(forms.ModelForm):
         model = DoctorSchedule
         fields = ['date', 'start_time', 'end_time', 'max_patients']
         # fields = ['date', 'start_time', 'end_time', 'max_patients', 'current_patients']
+
+# class DoctorAppointmentForm(forms.ModelForm):
+#     class Meta:
+#         model = Appointment
+#         fields = ['patient', 'status']
+
 
 # 假设 gender_choices 是这样定义的
 gender_choices = [

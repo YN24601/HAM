@@ -273,19 +273,23 @@ def book_appointment(request, pk):
     return redirect('doctor_detail', pk=schedule.doctor.id)
 
 def cancel_appointment(request, pk):
-    patient_id = request.session.get('patient_id')
-    patient = Patient.objects.get(id=patient_id)
-    appointment = get_object_or_404(Appointment, id=pk, patient=patient)
+    # patient_id = request.session.get('patient_id')
+    # patient = Patient.objects.get(id=patient_id)
+    # appointment = get_object_or_404(Appointment, id=pk, patient=patient)
+    appointment = get_object_or_404(Appointment, id=pk)
     
-    if appointment.status == 'pending':
-        appointment.status = 'cancelled'
-        appointment.save()
-        appointment.doctor_schedule.cancel()
+    if appointment.status == 'pending' or appointment.status == 'confirmed':
+        appointment.cancel()
         messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '预约已取消')
     else:
         messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '无法取消该预约')
-    
-    return redirect('appointment_record')
+    patient_id = request.session.get('patient_id')
+    doctor_id = request.session.get('doctor_id')
+    if patient_id:
+        return redirect('appointment_record')
+    elif doctor_id:
+        return redirect('check_appointment')
+    # return redirect('appointment_record')
 
 class AppointmentRecordView(ListView):
     model = Appointment
@@ -482,3 +486,33 @@ def DoctorScheduleDelete(request, pk):
     schedule = DoctorSchedule.objects.get(id=pk)
     schedule.delete()
     return redirect('doctor_schedule')
+
+class CheckAppointmentView(LoginRequiredMixin, TemplateView):
+    template_name = 'doctor/doctor_check_appointment.html'
+
+    def get(self, request, *args, **kwargs):
+        doctor_id = request.session.get('doctor_id')
+        doctor = Doctor.objects.get(id=doctor_id)
+        # 创建表单实例
+        # form = DoctorScheduleForm()
+        appointments = Appointment.objects.filter(status__in=['pending', 'confirmed'], doctor_schedule__doctor = doctor).order_by('doctor_schedule__date', 'doctor_schedule__start_time')
+
+        return render(request, self.template_name, {
+            'appointments': appointments,
+            'doctor': doctor,
+        })
+    
+def confirm_appointment(request, pk):
+    
+    # doctor_id = request.session.get('doctor_id')
+    # doctor = Doctor.objects.get(id=doctor_id)
+    appointment = get_object_or_404(Appointment, id=pk)
+    
+    if appointment.status == 'pending':
+        appointment.confirm()
+        messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '预约已确认')
+    else:
+        messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '无法确认该预约')
+    
+    return redirect('check_appointment')
+    

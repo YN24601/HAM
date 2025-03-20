@@ -1,0 +1,76 @@
+{% extends "doctor/doctor_home.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% block content %}
+
+<main>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <!-- 预约筛选卡片 -->
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">预约信息</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- 预约时间段列表 -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>患者姓名</th>
+                                        <th>患者性别</th>
+                                        <th>患者年龄</th>
+                                        <th>预约日期</th>
+                                        <th>开始时间</th>
+                                        <th>结束时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in appointments %}
+                                    <tr>
+                                        <td>{{ appointment.patient.name }}</td>
+                                        <td>{{ appointment.patient.get_gender_display }}</td>
+                                        <td>{{ appointment.patient.getAge }}</td>
+                                        <td>{{ appointment.doctor_schedule.date }}</td>
+                                        <td>{{ appointment.doctor_schedule.start_time }}</td>
+                                        <td>{{ appointment.doctor_schedule.end_time }}</td>
+                                        <td>
+                                            {% if appointment.status == 'pending' %}
+                                                <span class="badge bg-warning">待处理</span>
+                                            {% elif appointment.status == 'confirmed' %}
+                                                <span class="badge bg-success">已确认</span>
+                                            {% elif appointment.status == 'cancelled' %}
+                                                <span class="badge bg-danger">已取消</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ appointment.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if appointment.status == 'pending' %}
+                                                <a href={% url 'confirm_appointment' appointment.id %} class="btn btn-primary btn-sm">确认</a>
+                                                {% comment %} <a href={% url 'cancel_appointment' appointment.id %} class="btn btn-danger btn-sm">取消</a> {% endcomment %}
+                                                <a href={% url 'cancel_appointment' appointment.id %} class="btn btn-secondary btn-sm">取消</a>
+                                            {% elif appointment.status == 'confirmed' %}
+                                                <a href="#" class="btn btn-primary btn-sm">接诊</a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="8" class="text-center">暂无预约记录</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock content %}

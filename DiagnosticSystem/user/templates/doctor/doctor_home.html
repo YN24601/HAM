@@ -89,7 +89,7 @@
           <h2>接诊</h2>
           <p>您好，{{ doctor.name }}医生。</p>
           <p>管理您的接诊信息，查看接诊状态。</p>
-          <a href="#" class="btn btn-outline-light" type="button">查看接诊</a>
+          <a href={% url 'check_appointment' %} class="btn btn-outline-light" type="button">查看接诊</a>
         </div>
       </div>
       <div class="col-md-6">

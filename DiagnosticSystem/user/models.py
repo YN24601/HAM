@@ -157,6 +157,16 @@ class Appointment(models.Model):
     created_at = models.DateTimeField('创建时间', auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField('更新时间', auto_now=True, null=True, blank=True)
 
+    def cancel(self):
+        self.status = AppointmentStatus.CANCELLED
+        self.doctor_schedule.cancel()
+        self.save()
+
+    def confirm(self):
+        self.status = AppointmentStatus.CONFIRMED
+        # self.doctor_schedule.book()
+        self.save()
+
     def __str__(self):
         return f"{self.patient} 预约 {self.doctor_schedule.doctor} - {self.status}"
     
