@@ -4,6 +4,149 @@
 {% block content %}
 <div class="container-fluid px-4 mt-4">
     <div class="row g-4">
+        <!-- 患者信息侧边栏（与之前一致） -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-user-injured"></i> 患者档案</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-5">姓名</dt>
+                        <dd class="col-sm-7">{{ appointment.patient.name }}</dd>
+                        <dt class="col-sm-5">性别</dt>
+                        <dd class="col-sm-7">{{ appointment.patient.get_gender_display }}</dd>
+                        <dt class="col-sm-5">年龄</dt>
+                        <dd class="col-sm-7">{{ appointment.patient.getAge }} 岁</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主诊疗区 -->
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-stethoscope"></i> 诊疗记录</h5>
+                </div>
+                <div class="card-body">
+                    <!-- 表单用于保存诊疗记录 -->
+                    <form id="recordForm" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- 上传图像及预览 -->
+                        <div class="mb-3">
+                            <label for="id_image" class="form-label">病灶图片</label>
+                            {{ form.image }}
+                            <div id="previewContainer" class="mt-3"></div>
+                        </div>
+
+                        <!-- AI预测结果区域 -->
+                        <div id="aiResult" style="display:none;">
+                            <div class="alert alert-info">
+                                <h3 class="alert-heading">AI预测结果：</h3>
+                                <ul id="predictionList" class="list-group"></ul>
+                                <p class="mt-3">建议：<strong id="aiDiagnosis"></strong></p>
+                            </div>
+                        </div>
+
+                        <!-- 医生填写临床诊断及治疗方案 -->
+                        <div class="mb-3">
+                            <label for="id_diagnosis" class="form-label">临床诊断</label>
+                            {{ form.diagnosis }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_treatment" class="form-label">治疗方案</label>
+                            {{ form.treatment }}
+                        </div>
+
+                        <!-- 隐藏字段：保存 AI 建议和图片引用 -->
+                        <input type="hidden" name="ai_diagnosis" id="hiddenAiDiagnosis" value="">
+                        <input type="hidden" name="uploaded_image" id="hiddenUploadedImage" value="">
+
+                        <!-- 按钮 -->
+                        <button type="button" id="getAISuggestions" class="btn btn-secondary">获取AI建议</button>
+                        <button type="submit" name="action" value="save" class="btn btn-primary">保存记录</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 引入 jQuery（确保页面中加载了 jQuery） -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // 图片预览功能
+    function previewImage(event) {
+        const reader = new FileReader();
+        reader.onload = function() {
+            const preview = document.getElementById('previewContainer');
+            preview.innerHTML = `<img src="${reader.result}" class="img-fluid rounded shadow" style="max-height:300px;">`;
+        };
+        if (event.target.files[0]) {
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    }
+    document.getElementById("id_image").addEventListener("change", previewImage);
+
+    // AJAX 上传图片并获取 AI 建议
+    $('#getAISuggestions').click(function(e) {
+        e.preventDefault();
+        var fileInput = $('#id_image')[0].files[0];
+        if (!fileInput) {
+            alert("请先选择图片");
+            return;
+        }
+        var formData = new FormData();
+        formData.append('image', fileInput);
+        // 如果需要 CSRF token（推荐），可以这样添加：
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        $.ajax({
+            url: '/user/upload_image/',  // 请确保此 URL 与后端路由匹配
+            type: 'POST',
+            data: formData,
+            processData: false,  // 必须设置
+            contentType: false,  // 必须设置
+            success: function(data) {
+                // 更新页面显示预测结果
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                $('#aiResult').show();
+                $('#aiDiagnosis').text(data.ai_diagnosis);
+                // 清空之前的预测列表
+                $('#predictionList').empty();
+                $.each(data.top_predictions, function(index, prediction) {
+                    $('#predictionList').append(
+                        `<li class="list-group-item d-flex justify-content-between align-items-center">
+                             <span class="badge bg-primary rounded-pill">${index+1}</span>
+                             <strong>${prediction.class_name}</strong>
+                             <span class="badge bg-success rounded-pill">${prediction.probability}%</span>
+                         </li>`
+                    );
+                });
+                // 将返回的 AI 建议和图片引用保存到隐藏字段中，后续保存记录时使用
+                $('#hiddenAiDiagnosis').val(data.ai_diagnosis);
+                $('#hiddenUploadedImage').val(data.image_url);
+            },
+            error: function(xhr, status, error) {
+                alert('上传失败：' + error);
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% comment %} push {% endcomment %}
+{% comment %} {% extends "doctor/doctor_home.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid px-4 mt-4">
+    <div class="row g-4">
         <!-- 患者信息侧边栏 -->
         <div class="col-md-4">
             <div class="card shadow-sm">
@@ -92,4 +235,4 @@
     }
     document.getElementById("id_image").addEventListener("change", previewImage);
 </script>
-{% endblock %}
+{% endblock %} {% endcomment %}
