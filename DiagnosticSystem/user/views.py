@@ -557,6 +557,7 @@ class ConsultationView(LoginRequiredMixin, TemplateView):
                 record.appointment = appointment
                 record.ai_diagnosis = ai_diagnosis
                 record.save()
+                appointment.complete()
                 # 保存成功后可跳转到记录详情或其他页面
                 return redirect('medical_record_detail', record_id=record.pk)
             else:

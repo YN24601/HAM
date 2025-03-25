@@ -164,7 +164,10 @@ class Appointment(models.Model):
 
     def confirm(self):
         self.status = AppointmentStatus.CONFIRMED
-        # self.doctor_schedule.book()
+        self.save()
+
+    def complete(self):
+        self.status = AppointmentStatus.COMPLETED
         self.save()
 
     def __str__(self):
@@ -181,7 +184,7 @@ class MedicalRecord(models.Model):
     treatment = models.TextField('治疗方案', max_length=500, blank=True)
     ai_diagnosis = models.TextField('AI诊断结果', max_length=500, blank=True)
     created_at = models.DateTimeField('创建时间', auto_now_add=True, null=True, blank=True)
-    
+
     def __str__(self):
         return f"{self.appointment} - 诊疗结果：{self.diagnosis}"
 
