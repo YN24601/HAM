@@ -175,11 +175,13 @@ class Appointment(models.Model):
         verbose_name_plural = verbose_name
 
 class MedicalRecord(models.Model):
-    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE, verbose_name='预约记录')
+    appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE, verbose_name='预约记录')
+    image = models.ImageField(upload_to='consultation_images/', null=True, blank=True)
     diagnosis = models.TextField('诊断结果', max_length=500, blank=True)
     treatment = models.TextField('治疗方案', max_length=500, blank=True)
+    ai_diagnosis = models.TextField('AI诊断结果', max_length=500, blank=True)
     created_at = models.DateTimeField('创建时间', auto_now_add=True, null=True, blank=True)
-
+    
     def __str__(self):
         return f"{self.appointment} - 诊疗结果：{self.diagnosis}"
 

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Patient, Doctor, DoctorSchedule, Appointment, AppointmentStatus
+from .models import Patient, Doctor, DoctorSchedule, Appointment, AppointmentStatus, MedicalRecord
 
 class PatientCreationForm(forms.ModelForm):
     password1 = forms.CharField(label="密码", widget=forms.PasswordInput, min_length=8)
@@ -186,9 +186,20 @@ class ScheduleFilterForm(forms.Form):
 
 
 
-
-
-# class DoctorScheduleUpdateForm(forms.ModelForm):
-#     class Meta:
-#         model = DoctorSchedule
-        # fields = ['date', 'start_time', 'end_time', 'max_patients', 'current_patients']
+class MedicalRecordForm(forms.ModelForm):
+    class Meta:
+        model = MedicalRecord
+        fields = ['image', 'diagnosis', 'treatment']
+        widgets = {
+            'image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'onchange': 'previewImage(event)',
+            }),
+            'diagnosis': forms.Textarea(attrs={'rows': 4, 'placeholder': '请输入诊断结论...', 'class':"form-control" }),
+            'treatment': forms.Textarea(attrs={'rows': 4, 'placeholder': '请输入治疗方案...', 'class':"form-control"}),
+        }
+        labels = {
+            'image': '病灶图片',
+            'diagnosis': '临床诊断',
+            'treatment': '治疗方案',
+        }

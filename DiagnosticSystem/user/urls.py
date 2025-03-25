@@ -38,4 +38,6 @@ urlpatterns = [
     # 接诊
     path('check_appointment/', views.CheckAppointmentView.as_view(), name='check_appointment'),
     path('confirm_appointment/<int:pk>/', views.confirm_appointment, name='confirm_appointment'),
+    path('consultation/<int:appointment_id>/', views.ConsultationView.as_view(), name='doctor_consultation'),
+    # path('analyze_image/', views.AnalyzeImageView.as_view(), name='analyze_image'),
 ]

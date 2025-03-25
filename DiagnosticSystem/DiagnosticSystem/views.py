@@ -10,7 +10,6 @@ import torchvision.models as models
 from torchvision import transforms
 import torch.nn.functional as F
 from PIL import Image
-from django.conf import settings
 
 class HomeView(TemplateView):
     template_name = 'home.html'

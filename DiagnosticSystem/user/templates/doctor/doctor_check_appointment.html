@@ -54,7 +54,7 @@
                                                 {% comment %} <a href={% url 'cancel_appointment' appointment.id %} class="btn btn-danger btn-sm">取消</a> {% endcomment %}
                                                 <a href={% url 'cancel_appointment' appointment.id %} class="btn btn-secondary btn-sm">取消</a>
                                             {% elif appointment.status == 'confirmed' %}
-                                                <a href="#" class="btn btn-primary btn-sm">接诊</a>
+                                                <a href={% url 'doctor_consultation' appointment.id %} class="btn btn-primary btn-sm">接诊</a>
                                             {% endif %}
                                         </td>
                                     </tr>

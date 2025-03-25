@@ -1,15 +1,27 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
+from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.views import View
 from django.views.generic import TemplateView, CreateView, FormView, UpdateView, ListView
 from django.db.models import Q
 CUSTOM_MESSAGE_LEVEL = 10  # 自定义消息级别
-from .models import Patient, Doctor, DoctorSchedule, Appointment, AppointmentStatus
+from .models import Patient, Doctor, DoctorSchedule, Appointment, AppointmentStatus, MedicalRecord
 from .forms import PatientCreationForm, PatientLoginForm, PatientForm, DoctorFilterForm, ScheduleFilterForm
-from .forms import DoctorLoginForm, DoctorForm, DoctorScheduleForm
+from .forms import DoctorLoginForm, DoctorForm, DoctorScheduleForm, MedicalRecordForm
 from DiagnosticSystem.mixins import LoginRequiredMixin
 from datetime import date, timedelta
+
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+
+import torch
+import torchvision.models as models
+from torchvision import transforms
+import torch.nn.functional as F
+from PIL import Image
+import os
 
 
 # 用户注册
@@ -515,4 +527,120 @@ def confirm_appointment(request, pk):
         messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '无法确认该预约')
     
     return redirect('check_appointment')
-    
+
+
+# class ConsultationView(LoginRequiredMixin, TemplateView):
+#     template_name = 'doctor/consultation.html'
+
+#     def get(self, request, *args, **kwargs):
+#         # 获取预约记录和医生信息
+#         appointment = get_object_or_404(Appointment, id=kwargs['appointment_id'])
+#         doctor = Doctor.objects.get(id=request.session['doctor_id'])
+#         form = ConsultationForm()
+        
+#         return render(request, self.template_name, {
+#             'appointment': appointment,
+#             'form': form,
+#             'doctor': doctor,
+#         })
+
+class ConsultationView(LoginRequiredMixin, TemplateView):
+    template_name = 'doctor/consultation.html'  # 模板可以继承 doctor/doctor_home.html
+
+    def get(self, request, *args, **kwargs):
+        appointment = get_object_or_404(Appointment, id=kwargs['appointment_id'])
+        form = MedicalRecordForm()
+        context = {
+            'appointment': appointment,
+            'form': form,
+        }
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        appointment = get_object_or_404(Appointment, id=kwargs['appointment_id'])
+        action = request.POST.get('action')
+        # 注意：这里构造表单时包含 request.FILES
+        form = MedicalRecordForm(request.POST, request.FILES)
+        print('form:', form)
+        # 尝试从隐藏字段中获取之前计算的 AI 建议
+        ai_diagnosis = request.POST.get('ai_diagnosis', '')
+        top_predictions = None
+
+        if action == 'get_ai' and request.FILES.get('image'):
+            # 第一步：上传图像并计算 AI 建议
+            upload_file = request.FILES['image']
+            file_path = os.path.join(settings.MEDIA_ROOT, upload_file.name)
+            # 将上传的图像保存到本地（也可以使用 Django 的 InMemoryUploadedFile 直接处理）
+            with open(file_path, 'wb') as f:
+                for chunk in upload_file.chunks():
+                    f.write(chunk)
+            try:
+                # 加载预训练模型，修改分类层，并加载权重（参考 ClassificationView）
+                model = models.mobilenet_v2(pretrained=False)
+                num_classes = 7  # 七分类
+                model.classifier[1] = torch.nn.Linear(model.classifier[1].in_features, num_classes)
+                model.load_state_dict(torch.load('model/mobilenetv2_model.pth', map_location=torch.device('cpu')))
+                model.eval()
+
+                preprocess = transforms.Compose([
+                    transforms.Resize((224, 224)),
+                    transforms.ToTensor(),
+                    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+                ])
+
+                image = Image.open(file_path)
+                input_tensor = preprocess(image)
+                input_batch = input_tensor.unsqueeze(0)
+                device = torch.device("cpu")
+                model.to(device)
+                input_batch = input_batch.to(device)
+
+                with torch.no_grad():
+                    output = model(input_batch)
+                probabilities = F.softmax(output, dim=1)[0]
+                top_probabilities, top_indices = torch.topk(probabilities, 3)
+                class_names = ['akiec', 'bcc', 'bkl', 'df', 'mel', 'nv', 'vasc']
+
+                top_predictions = []
+                for i in range(3):
+                    class_name = class_names[top_indices[i].item()]
+                    probability = top_probabilities[i].item() * 100
+                    top_predictions.append({
+                        'class_name': class_name,
+                        'probability': round(probability, 2)
+                    })
+                # 默认将概率最高的结果作为 AI 诊断建议
+                ai_diagnosis = top_predictions[0]['class_name']
+            except Exception as e:
+                form.add_error('image', f"图像处理错误：{str(e)}")
+
+            # 返回页面让医生参考 AI 预测结果，同时保留医生填写的信息（未保存记录）
+            context = {
+                'appointment': appointment,
+                'form': form,
+                'ai_diagnosis': ai_diagnosis,
+                'top_predictions': top_predictions,
+            }
+            return self.render_to_response(context)
+
+        elif action == 'save':
+            # 第二步：医生点击保存，将包含隐藏字段的 AI 建议与其他信息一并保存
+            if form.is_valid():
+                record = form.save(commit=False)
+                record.appointment = appointment
+                record.ai_diagnosis = ai_diagnosis
+                record.save()
+                # 保存成功后可跳转到记录详情或其他页面
+                return redirect('medical_record_detail', pk=record.pk)
+            else:
+                context = {
+                    'appointment': appointment,
+                    'form': form,
+                    'ai_diagnosis': ai_diagnosis,
+                    'top_predictions': top_predictions,
+                }
+                return self.render_to_response(context)
+        else:
+            # 如果没有特定 action，则返回原页面
+            context = {'appointment': appointment, 'form': form}
+            return self.render_to_response(context)
