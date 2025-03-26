@@ -8,6 +8,7 @@ urlpatterns = [
     path('register/', views.PatientCreateView.as_view(), name='patient_create'),
     path('home/', views.PatientHomeView.as_view(), name='dashboard'),
     path('logout/', views.PatientLogout, name='patient_logout'),
+    path("profile/", views.PatientProfileView.as_view(), name="profile"),
     # 主页静态页面
     path("disease_intro/", views.DiseaseViewForUser.as_view(), name="disease_intro_for_users"),
     path('disease_intro/akiec', views.AKIECView.as_view(), name='akiec'),
@@ -24,8 +25,12 @@ urlpatterns = [
     path('appointment_record/', views.AppointmentRecordView.as_view(), name='appointment_record'),
     path('cancel_appointment/<int:pk>/', views.cancel_appointment, name='cancel_appointment'),
     path('schedule_list/', views.ScheduleListView.as_view(), name='schedule_list'),
-    # 个人信息
-    path("profile/", views.PatientProfileView.as_view(), name="profile"),
+    # 就诊记录
+    # path('medical_records/', views.MedicalRecordListView.as_view(), name='medical_records'),
+    # path('medical_record_detail/<int:record_id>/', views.MedicalRecordDetailView.as_view(), name='medical_record_detail'),
+    
+    path('records/', views.PatientMedicalRecordListView.as_view(), name='patient_medical_records'),
+    path('records/<int:pk>/', views.PatientMedicalRecordDetailView.as_view(), name='patient_medical_record_detail'),
 #-----------------------------------------------------------------------------
     path('doctor_login/', views.DoctorLoginView.as_view(), name='doctor_login'),
     path('doctor_home/', views.DoctorHomeView.as_view(), name='doctor_home'),
@@ -40,6 +45,6 @@ urlpatterns = [
     path('confirm_appointment/<int:pk>/', views.confirm_appointment, name='confirm_appointment'),
     path('consultation/<int:appointment_id>/', views.ConsultationView.as_view(), name='doctor_consultation'),
     path('upload_image/', views.upload_image, name='upload_image'),
+    path('medical_records/', views.MedicalRecordListView.as_view(), name='doctor_medical_records'),
     path('medical_record_detail/<int:record_id>/', views.MedicalRecordDetailView.as_view(), name='medical_record_detail'),
-    path('medical-records/', views.MedicalRecordListView.as_view(), name='doctor_medical_records'),
 ]

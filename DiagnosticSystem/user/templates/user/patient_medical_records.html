@@ -1,0 +1,199 @@
+{# patient_medical_records.html #}
+{% extends "user/patient_home.html" %}
+{% load static widget_tweaks %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <!-- 搜索筛选卡 -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">就诊记录查询</h4>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-6">
+                                <label class="form-label">综合搜索</label>
+                                {% comment %} <input type="text" name="search" class="form-control"
+                                    placeholder="搜索医生姓名、诊断结果或治疗方案"
+                                    value="{{ search_query }}"> {% endcomment %}
+                                <input type="text" name="search" class="form-control"
+                                    placeholder="搜索医生姓名、诊断结果或治疗方案"
+                                    value="{{ search_query }}">
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label">医生姓名</label>
+                            <input type="text" name="doctor_name" class="form-control"
+                                placeholder="输入医生姓名" value="{{ doctor_name }}">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">医生性别</label>
+                            <select name="doctor_gender" class="form-select">
+                                <option value="">全部</option>
+                                <option value="男" {% if doctor_gender == '男' %}selected{% endif %}>男</option>
+                                <option value="女" {% if doctor_gender == '女' %}selected{% endif %}>女</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">年份</label>
+                            <select name="year" class="form-select">
+                                <option value="">全部年份</option>
+                                {% for year in years %}
+                                <option value="{{ year }}" {% if year|stringformat:"s" == selected_year %}selected{% endif %}>{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">月份</label>
+                            <select name="month" class="form-select">
+                                <option value="">全部月份</option>
+                                {% for month in months %}
+                                <option value="{{ month }}" {% if month|stringformat:"s" == selected_month %}selected{% endif %}>{{ month }}月</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">日期</label>
+                            <select name="day" class="form-select">
+                                <option value="">全部日期</option>
+                                {% for day in days %}
+                                <option value="{{ day }}" {% if day|stringformat:"s" == selected_day %}selected{% endif %}>{{ day }}日</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">排序方式</label>
+                            <select name="sort_by" class="form-select">
+                                <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>最新记录在前</option>
+                                <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>最早记录在前</option>
+                                <option value="doctor_name" {% if sort_by == 'doctor_name' %}selected{% endif %}>医生姓名升序</option>
+                                <option value="-doctor_name" {% if sort_by == '-doctor_name' %}selected{% endif %}>医生姓名降序</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-filter me-1"></i>筛选
+                            </button>
+                            <a href="{% url 'patient_medical_records' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-sync-alt me-1"></i>重置
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 记录列表 -->
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">我的就诊记录</h4>
+                        <span class="badge bg-light text-dark">共 {{ paginator.count }} 条记录</span>
+                    </div>
+                </div>
+                
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>就诊时间</th>
+                                <th>接诊医生</th>
+                                <th>诊断结果</th>
+                                <th>治疗方案</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in page_obj %}
+                            <tr>
+                                <td>{{ record.created_at|date:"Y-m-d H:i" }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ record.appointment.doctor_schedule.doctor.avatar.url }}" 
+                                             class="rounded-circle me-3" width="40" height="40"
+                                             onerror="this.src='{% static 'images/default_doctor.jpg' %}'">
+                                        <div>
+                                            <h6 class="mb-0">Dr. {{ record.appointment.doctor_schedule.doctor.name }}</h6>
+                                            <small class="text-muted">{{ record.appointment.doctor_schedule.doctor.department }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ record.diagnosis|truncatechars:30|default:"暂无" }}</td>
+                                <td>{{ record.treatment|truncatechars:30|default:"暂无" }}</td>
+                                <td>
+                                    <a href="{% url 'patient_medical_record_detail' record.pk %}" 
+                                       class="btn btn-primary btn-sm"
+                                       data-bs-toggle="tooltip"
+                                       title="查看详情">
+                                        <i class="fas fa-file-medical"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <i class="fas fa-folder-open fa-2x text-muted mb-3"></i>
+                                    <p class="text-muted">未找到符合条件的记录</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                    <!-- 分页 -->
+                    {% if page_obj.paginator.num_pages > 1 %}
+                    <div class="card-footer">
+                        <ul class="pagination justify-content-center mb-0">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1&{{ query_params }}">&laquo;&laquo;</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ query_params }}">&laquo;</a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                            {% if num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
+                            <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}&{{ query_params }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ query_params }}">&raquo;</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&{{ query_params }}">&raquo;&raquo;</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 初始化工具提示
+    [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        .forEach(function(tooltip) {
+            new bootstrap.Tooltip(tooltip);
+        });
+});
+</script>
+{% endblock %}

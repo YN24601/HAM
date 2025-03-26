@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views import View
-from django.views.generic import TemplateView, CreateView, FormView, UpdateView, ListView
+from django.views.generic import TemplateView, CreateView, FormView, UpdateView, ListView, DetailView
 from django.db.models import Q
 CUSTOM_MESSAGE_LEVEL = 10  # 自定义消息级别
 from .models import Patient, Doctor, DoctorSchedule, Appointment, AppointmentStatus, MedicalRecord
@@ -372,6 +372,99 @@ class ScheduleListView(TemplateView):
             context['form'] = form
         return context
 
+
+class PatientMedicalRecordListView(LoginRequiredMixin, ListView):
+    model = MedicalRecord
+    template_name = 'user/patient_medical_records.html'
+    context_object_name = 'medical_records'
+    paginate_by = 10
+
+    def get_queryset(self):
+        patient_id = self.request.session.get('patient_id')
+        patient = Patient.objects.get(id=patient_id)
+        queryset = super().get_queryset().filter(
+            appointment__patient=patient
+        ).select_related(
+            'appointment__doctor_schedule__doctor',
+            'appointment__patient'
+        )
+
+        # 获取筛选参数
+        search_query = self.request.GET.get('search', '')
+        doctor_name = self.request.GET.get('doctor_name', '')
+        doctor_gender = self.request.GET.get('doctor_gender', '')
+        year = self.request.GET.get('year', '')
+        month = self.request.GET.get('month', '')
+        day = self.request.GET.get('day', '')
+        sort_by = self.request.GET.get('sort_by', '-created_at')
+
+        # 构建查询条件
+        conditions = Q()
+        if search_query:
+            conditions |= Q(diagnosis__icontains=search_query)
+            conditions |= Q(treatment__icontains=search_query)
+            conditions |= Q(appointment__doctor_schedule__doctor__name__icontains=search_query)
+        
+        if doctor_name:
+            conditions &= Q(appointment__doctor_schedule__doctor__name__icontains=doctor_name)
+
+        if doctor_gender:
+            conditions &= Q(appointment__doctor_schedule__doctor__gender=doctor_gender)
+
+        # 日期筛选
+        date_conditions = Q()
+        if year:
+            date_conditions &= Q(created_at__year=year)
+        if month:
+            date_conditions &= Q(created_at__month=month)
+        if day:
+            date_conditions &= Q(created_at__day=day)
+        
+        if conditions or date_conditions:
+            queryset = queryset.filter(conditions & date_conditions)
+
+        # 处理排序
+        valid_sort_fields = {
+            '-created_at': '-created_at',
+            'created_at': 'created_at',
+            'doctor_name': 'appointment__doctor_schedule__doctor__name',
+            '-doctor_name': '-appointment__doctor_schedule__doctor__name'
+        }
+        return queryset.order_by(valid_sort_fields.get(sort_by, '-created_at'))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        current_date = datetime.now().date()
+        
+        # 生成筛选选项
+        context.update({
+            'years': range(current_date.year, current_date.year - 5, -1),
+            'months': range(1, 13),
+            'days': range(1, 32),
+            'search_query': self.request.GET.get('search', ''),
+            'doctor_name': self.request.GET.get('doctor_name', ''),
+            'selected_year': self.request.GET.get('year', ''),
+            'selected_month': self.request.GET.get('month', ''),
+            'selected_day': self.request.GET.get('day', ''),
+            'sort_by': self.request.GET.get('sort_by', '-created_at')
+        })
+        return context
+
+class PatientMedicalRecordDetailView(LoginRequiredMixin, DetailView):
+    model = MedicalRecord
+    template_name = 'user/patient_medical_record_detail.html'
+    context_object_name = 'record'
+
+    def get_queryset(self):
+        patient_id = self.request.session.get('patient_id')
+        patient = Patient.objects.get(id=patient_id)
+        return super().get_queryset().filter(
+            appointment__patient=patient
+        ).select_related(
+            'appointment__doctor_schedule__doctor',
+            'appointment__patient'
+        )        
+
 #############################################################################################
 ######################################### DOCTOR ############################################
 #############################################################################################
@@ -635,23 +728,6 @@ def upload_image(request):
         except Exception as e:
             return JsonResponse({'error': f'图像处理错误：{str(e)}'}, status=500)
     return JsonResponse({'error': '仅支持 POST 请求'}, status=405)
-
-'''
-class MedicalRecordDetailView(LoginRequiredMixin, TemplateView):
-    model = MedicalRecord
-    template_name = 'doctor/medical_record_detail.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        record = get_object_or_404(MedicalRecord, id=kwargs['record_id'])
-        doctor_id = self.request.session.get('doctor_id')
-        doctor = Doctor.objects.get(id=doctor_id)
-        context['doctor'] = doctor
-        context['record'] = record
-        return context
-
-'''
 
 class MedicalRecordDetailView(LoginRequiredMixin, TemplateView):
     template_name = 'doctor/medical_record_detail.html'
