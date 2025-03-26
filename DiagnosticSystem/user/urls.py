@@ -41,5 +41,5 @@ urlpatterns = [
     path('consultation/<int:appointment_id>/', views.ConsultationView.as_view(), name='doctor_consultation'),
     path('upload_image/', views.upload_image, name='upload_image'),
     path('medical_record_detail/<int:record_id>/', views.MedicalRecordDetailView.as_view(), name='medical_record_detail'),
-    # path('analyze_image/', views.AnalyzeImageView.as_view(), name='analyze_image'),
+    path('medical-records/', views.MedicalRecordListView.as_view(), name='doctor_medical_records'),
 ]

@@ -11,7 +11,8 @@ from .models import Patient, Doctor, DoctorSchedule, Appointment, AppointmentSta
 from .forms import PatientCreationForm, PatientLoginForm, PatientForm, DoctorFilterForm, ScheduleFilterForm
 from .forms import DoctorLoginForm, DoctorForm, DoctorScheduleForm, MedicalRecordForm
 from DiagnosticSystem.mixins import LoginRequiredMixin
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
+from django.utils import timezone
 
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -22,7 +23,6 @@ from torchvision import transforms
 import torch.nn.functional as F
 from PIL import Image
 import os
-
 
 # 用户注册
 class PatientCreateView(CreateView):
@@ -106,7 +106,7 @@ class PatientProfileView(LoginRequiredMixin, UpdateView):
     #     print('表单数据:', form.cleaned_data)    # 检查处理后的数据
     #     return super().form_valid(form)
 
-# 皮肤病介绍
+################## 静态 - 皮肤病介绍 ###################
 class DiseaseViewForUser(TemplateView):
     template_name = 'user/disease_intro_for_users.html'
 
@@ -170,6 +170,8 @@ class VASCView(LoginRequiredMixin, TemplateView):
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'status': 'authenticated'})
         return super().get(request, *args, **kwargs)
+
+################### 功能 ###################
 
 class DoctorListView(TemplateView):
     template_name = 'user/doctor_list.html'
@@ -528,7 +530,6 @@ def confirm_appointment(request, pk):
     
     return redirect('check_appointment')
 
-
 class ConsultationView(LoginRequiredMixin, TemplateView):
     template_name = 'doctor/consultation.html'  # 模板可以继承 doctor/doctor_home.html
 
@@ -572,8 +573,6 @@ class ConsultationView(LoginRequiredMixin, TemplateView):
             # 如果没有特定 action，则返回原页面
             context = {'appointment': appointment, 'form': form, 'doctor': doctor}
             return self.render_to_response(context)
-
-
 
 @csrf_exempt  # 如果使用 AJAX，请确保正确处理 CSRF（建议使用 AJAX 时传递 CSRF token）
 def upload_image(request):
@@ -637,6 +636,7 @@ def upload_image(request):
             return JsonResponse({'error': f'图像处理错误：{str(e)}'}, status=500)
     return JsonResponse({'error': '仅支持 POST 请求'}, status=405)
 
+'''
 class MedicalRecordDetailView(LoginRequiredMixin, TemplateView):
     model = MedicalRecord
     template_name = 'doctor/medical_record_detail.html'
@@ -649,4 +649,121 @@ class MedicalRecordDetailView(LoginRequiredMixin, TemplateView):
         doctor = Doctor.objects.get(id=doctor_id)
         context['doctor'] = doctor
         context['record'] = record
+        return context
+
+'''
+
+class MedicalRecordDetailView(LoginRequiredMixin, TemplateView):
+    template_name = 'doctor/medical_record_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # 获取诊疗记录
+        record_id = kwargs.get('record_id') or self.request.GET.get('record_id')
+        record = get_object_or_404(
+            MedicalRecord.objects.select_related(
+                'appointment__patient',
+                'appointment__doctor_schedule__doctor'
+            ),
+            id=record_id,
+            appointment__doctor_schedule__doctor_id=self.request.session.get('doctor_id')
+        )
+        
+        # 获取当前医生信息
+        doctor_id = self.request.session.get('doctor_id')
+        doctor = Doctor.objects.get(id=doctor_id)
+        
+        context['doctor'] = doctor
+        context['record'] = record
+        
+        return context
+
+class MedicalRecordListView(LoginRequiredMixin, ListView):
+    model = MedicalRecord
+    template_name = 'doctor/doctor_medical_records.html'
+    context_object_name = 'medical_records'
+    paginate_by = 10  # 每页显示10条记录
+
+    def get_queryset(self):
+        doctor_id = self.request.session.get('doctor_id')
+        queryset = super().get_queryset().filter(
+            appointment__doctor_schedule__doctor_id=doctor_id
+        ).select_related(
+            'appointment__patient',
+            'appointment__doctor_schedule__doctor'
+        ).order_by('-created_at')
+
+        # 搜索和筛选处理
+        search_query = self.request.GET.get('search', '')
+        patient_name = self.request.GET.get('patient_name', '')
+        patient_mobile = self.request.GET.get('patient_mobile', '')
+        patient_idcard = self.request.GET.get('patient_idcard', '')
+        year = self.request.GET.get('year', '')
+        month = self.request.GET.get('month', '')
+        day = self.request.GET.get('day', '')
+        sort_by = self.request.GET.get('sort_by', '-created_at')
+
+        # 构建查询条件
+        conditions = Q()
+        if search_query:
+            conditions |= Q(appointment__patient__name__icontains=search_query)
+            conditions |= Q(appointment__patient__mobile__icontains=search_query)
+            conditions |= Q(appointment__patient__idcard__icontains=search_query)
+            conditions |= Q(diagnosis__icontains=search_query)
+        
+        if patient_name:
+            conditions &= Q(appointment__patient__name__icontains=patient_name)
+        if patient_mobile:
+            conditions &= Q(appointment__patient__mobile__icontains=patient_mobile)
+        if patient_idcard:
+            conditions &= Q(appointment__patient__idcard__icontains=patient_idcard)
+        
+        # 日期筛选
+        date_conditions = Q()
+        if year:
+            date_conditions &= Q(created_at__year=year)
+        if month:
+            date_conditions &= Q(created_at__month=month)
+        if day:
+            date_conditions &= Q(created_at__day=day)
+        
+        if conditions or date_conditions:
+            queryset = queryset.filter(conditions & date_conditions)
+
+        # 排序
+        if sort_by in ['created_at', '-created_at', 'appointment__patient__name', '-appointment__patient__name']:
+            queryset = queryset.order_by(sort_by)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # 获取当前年份、月份和日期，用于筛选表单的默认值
+        # current_date = datetime.now()
+        current_date  = datetime.today().date()
+        context['current_year'] = current_date.year
+        context['current_month'] = current_date.month
+        context['current_day'] = current_date.day
+        
+        # 获取筛选参数，用于保持表单状态
+        context['search_query'] = self.request.GET.get('search', '')
+        context['patient_name'] = self.request.GET.get('patient_name', '')
+        context['patient_mobile'] = self.request.GET.get('patient_mobile', '')
+        context['patient_idcard'] = self.request.GET.get('patient_idcard', '')
+        context['selected_year'] = self.request.GET.get('year', '')
+        context['selected_month'] = self.request.GET.get('month', '')
+        context['selected_day'] = self.request.GET.get('day', '')
+        context['sort_by'] = self.request.GET.get('sort_by', '-created_at')
+        
+        # 生成年份选择列表（最近5年）
+        context['years'] = range(current_date.year, current_date.year - 5, -1)
+        context['months'] = range(1, 13)
+        context['days'] = range(1, 32)
+
+        doctor_id = self.request.session.get('doctor_id')
+        doctor = Doctor.objects.get(id=doctor_id)
+        context['doctor'] = doctor
+        
         return context
