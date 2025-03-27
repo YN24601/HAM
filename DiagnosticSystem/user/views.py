@@ -234,7 +234,7 @@ class DoctorDetailView(TemplateView):
         # 获取医生对象
         doctor = Doctor.objects.get(id=doctor_id)
         # 获取医生的排班信息
-        schedules = DoctorSchedule.objects.filter(doctor=doctor).order_by('date', 'start_time')
+        schedules = DoctorSchedule.objects.filter(doctor=doctor, is_expired=False).order_by('date', 'start_time')
         # 将医生和排班信息
         context['doctor'] = doctor
         context['schedules'] = schedules
@@ -263,7 +263,7 @@ def book_appointment(request, pk):
         return redirect('doctor_detail', pk=schedule.doctor.id)
 
     # 检查排班是否还可预约
-    if not schedule.avaliable():
+    if not schedule.is_available:
         messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '该时间段已满，无法预约。')
         # messages.warning(request, CUSTOM_MESSAGE_LEVEL, '该时间段已满，无法预约。')
         return redirect('doctor_detail', pk=schedule.doctor.id)
@@ -287,9 +287,6 @@ def book_appointment(request, pk):
     return redirect('doctor_detail', pk=schedule.doctor.id)
 
 def cancel_appointment(request, pk):
-    # patient_id = request.session.get('patient_id')
-    # patient = Patient.objects.get(id=patient_id)
-    # appointment = get_object_or_404(Appointment, id=pk, patient=patient)
     appointment = get_object_or_404(Appointment, id=pk)
     
     if appointment.status == 'pending' or appointment.status == 'confirmed':
@@ -297,13 +294,7 @@ def cancel_appointment(request, pk):
         messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '预约已取消')
     else:
         messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '无法取消该预约')
-    patient_id = request.session.get('patient_id')
-    doctor_id = request.session.get('doctor_id')
-    if patient_id:
-        return redirect('appointment_record')
-    elif doctor_id:
-        return redirect('check_appointment')
-    # return redirect('appointment_record')
+    return redirect('appointment_record')
 
 class AppointmentRecordView(ListView):
     model = Appointment
@@ -340,11 +331,6 @@ class ScheduleListView(TemplateView):
             title = form.cleaned_data.get('title')
             date = form.cleaned_data.get('date')
             time = form.cleaned_data.get('time')
-            # print("name: ", name)
-            # print("gender: ", gender)
-            # print("title: ", title)
-            # print("date: ", date)
-            # print("time: ", time)
 
             # 根据表单数据过滤医生
             query = Q()
@@ -360,18 +346,19 @@ class ScheduleListView(TemplateView):
                 query &= Q(start_time__lte=time) & Q(end_time__gte=time)
 
             query &= Q(is_available=True)
-                       
+            query &= Q(is_expired=False)
+
             schedules = DoctorSchedule.objects.filter(query)
             context['schedules'] = schedules
             context['form'] = form
         else:
             query = Q()
             query &= Q(is_available=True)
+            query &= Q(is_expired=False)
             schedules = DoctorSchedule.objects.filter(query)
             context['schedules'] = schedules
             context['form'] = form
         return context
-
 
 class PatientMedicalRecordListView(LoginRequiredMixin, ListView):
     model = MedicalRecord
@@ -448,6 +435,9 @@ class PatientMedicalRecordListView(LoginRequiredMixin, ListView):
             'selected_day': self.request.GET.get('day', ''),
             'sort_by': self.request.GET.get('sort_by', '-created_at')
         })
+        patient_id = self.request.session.get('patient_id')
+        patient = Patient.objects.get(id=patient_id)
+        context['patient'] = patient
         return context
 
 class PatientMedicalRecordDetailView(LoginRequiredMixin, DetailView):
@@ -464,6 +454,7 @@ class PatientMedicalRecordDetailView(LoginRequiredMixin, DetailView):
             'appointment__doctor_schedule__doctor',
             'appointment__patient'
         )        
+
 
 #############################################################################################
 ######################################### DOCTOR ############################################
@@ -540,9 +531,9 @@ class DoctorScheduleView(LoginRequiredMixin, TemplateView):
         available = request.GET.get('available')
         if available is not None:
             available = int(available)
-            schedules = DoctorSchedule.objects.filter(doctor=doctor, is_available=available).order_by('date', 'start_time')
+            schedules = DoctorSchedule.objects.filter(doctor=doctor, is_expired=False, is_available=available).order_by('date', 'start_time')
         else:
-            schedules = DoctorSchedule.objects.filter(doctor=doctor).order_by('date', 'start_time')
+            schedules = DoctorSchedule.objects.filter(doctor=doctor, is_expired=False).order_by('date', 'start_time')
         
         # 创建表单实例
         form = DoctorScheduleForm()
@@ -587,7 +578,9 @@ class DoctorScheduleEditView(LoginRequiredMixin, UpdateView):
         if form.cleaned_data['max_patients'] < schedule.current_patients:
             form.add_error('max_patients', '最大患者数不能小于已预约的患者人数')
             return self.form_invalid(form)
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        self.object.checkAvailable()
+        return response
 
 def DoctorScheduleDelete(request, pk):
     schedule = DoctorSchedule.objects.get(id=pk)
@@ -611,8 +604,6 @@ class CheckAppointmentView(LoginRequiredMixin, TemplateView):
     
 def confirm_appointment(request, pk):
     
-    # doctor_id = request.session.get('doctor_id')
-    # doctor = Doctor.objects.get(id=doctor_id)
     appointment = get_object_or_404(Appointment, id=pk)
     
     if appointment.status == 'pending':
@@ -621,6 +612,17 @@ def confirm_appointment(request, pk):
     else:
         messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '无法确认该预约')
     
+    return redirect('check_appointment')
+
+def reject_appointment(request, pk):
+    appointment = get_object_or_404(Appointment, id=pk)
+
+    if appointment.status == 'pending':
+        appointment.cancel()
+        messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '预约已取消')
+    else:
+        messages.add_message(request, CUSTOM_MESSAGE_LEVEL, '无法拒绝该预约')
+
     return redirect('check_appointment')
 
 class ConsultationView(LoginRequiredMixin, TemplateView):
@@ -842,4 +844,81 @@ class MedicalRecordListView(LoginRequiredMixin, ListView):
         doctor = Doctor.objects.get(id=doctor_id)
         context['doctor'] = doctor
         
+        return context
+
+class DoctorAppointmentListView(LoginRequiredMixin, ListView):
+    model = Appointment
+    template_name = 'doctor/doctor_appointments.html'
+    context_object_name = 'appointments'
+    paginate_by = 12
+
+    def get_queryset(self):
+        doctor_id = self.request.session.get('doctor_id')
+        queryset = super().get_queryset().filter(
+            doctor_schedule__doctor__id=doctor_id
+        ).select_related(
+            'patient',
+            'doctor_schedule'
+        )
+
+        # 处理筛选参数
+        search = self.request.GET.get('search', '')
+        status = self.request.GET.get('status', '')
+        date = self.request.GET.get('date', '')
+        sort = self.request.GET.get('sort', '-created_at')
+
+        # 构建查询条件
+        filters = Q()
+        if search:
+            filters &= Q(patient__name__icontains=search)
+        if status:
+            filters &= Q(status=status)
+        if date:
+            filters &= Q(doctor_schedule__date=date)
+
+        # 处理排序
+        valid_sorts = {
+            '-date': '-doctor_schedule__date',
+            'date': 'doctor_schedule__date',
+            '-created': '-created_at',
+            'created': 'created_at',
+            'name': 'patient__name',
+            '-name': '-patient__name'
+        }
+
+        return queryset.filter(filters).order_by(valid_sorts.get(sort, '-created_at'))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        doctor_id = self.request.session.get('doctor_id')
+        doctor = Doctor.objects.get(id=doctor_id)
+        
+        context['status_choices'] = AppointmentStatus.choices
+        context['doctor'] = doctor
+        context['date'] = self.request.GET.get('date', '')
+
+        context.update({
+            'selected_status': self.request.GET.get('status', ''),
+            'search_term': self.request.GET.get('search', ''),
+            'sort_by': self.request.GET.get('sort', '-created_at')
+        })
+        return context
+
+class AppointmentDetailView(LoginRequiredMixin, DetailView):
+    model = Appointment
+    template_name = 'doctor/appointment_detail.html'
+    context_object_name = 'appointment'
+
+    def get_queryset(self):
+        doctor_id = self.request.session.get('doctor_id')
+        return super().get_queryset().select_related(
+            'patient',
+            'doctor_schedule__doctor'
+        ).filter(doctor_schedule__doctor_id=doctor_id)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        doctor_id = self.request.session.get('doctor_id')
+        doctor = Doctor.objects.get(id=doctor_id)
+        context['doctor'] = doctor
         return context

@@ -116,18 +116,23 @@ class DoctorSchedule(models.Model):
     start_time = models.TimeField('开始时间', null=False, blank=False)
     end_time = models.TimeField('结束时间', null=False, blank=False)
     is_available = models.BooleanField('是否可预约', default=True)
+    is_expired = models.BooleanField('是否过期', default=False)
     max_patients = models.IntegerField('最大患者数', default=1)
     current_patients = models.IntegerField('当前患者数', default=0)
     created_at = models.DateTimeField('创建时间', auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField('更新时间', auto_now=True, null=True, blank=True)
     
     def __str__(self):
-        return f"{self.doctor} - {self.date} {self.start_time} - {self.end_time}"
+        if self.is_expired:
+            return f"{self.doctor} - {self.date} ({self.start_time} - {self.end_time}) - 已过期"
+        else:
+            return f"{self.doctor} - {self.date} ({self.start_time} - {self.end_time}) - {self.current_patients}/{self.max_patients}"
 
-    def avaliable(self):
-        is_available = self.max_patients > self.current_patients
-        return is_available
-    
+    def checkAvailable(self):
+        self.is_available = self.max_patients > self.current_patients
+        self.save()
+        return self.is_available
+        
     def book(self):
         self.current_patients += 1
         self.is_available = self.max_patients > self.current_patients
@@ -137,6 +142,12 @@ class DoctorSchedule(models.Model):
         self.current_patients -= 1
         self.is_available = self.max_patients > self.current_patients
         self.save()
+    
+    def checkExpired(self):
+        if self.date < datetime.now().date():
+            self.is_expired = True
+            self.save()
+        return self.is_expired
 
     class Meta:
         verbose_name = '医生排班'

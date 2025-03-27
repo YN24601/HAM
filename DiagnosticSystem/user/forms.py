@@ -141,17 +141,9 @@ class DoctorScheduleForm(forms.ModelForm):
     class Meta:
         model = DoctorSchedule
         fields = ['date', 'start_time', 'end_time', 'max_patients']
-        # fields = ['date', 'start_time', 'end_time', 'max_patients', 'current_patients']
 
-# class DoctorAppointmentForm(forms.ModelForm):
-#     class Meta:
-#         model = Appointment
-#         fields = ['patient', 'status']
-
-
-# 假设 gender_choices 是这样定义的
 gender_choices = [
-    ('', '不限'),  # 添加 "不限" 选项
+    ('', '不限'), 
     ('M', '男'),
     ('F', '女'),
 ]

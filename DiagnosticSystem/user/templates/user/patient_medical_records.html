@@ -127,13 +127,9 @@
                                 </td>
                                 <td>{{ record.diagnosis|truncatechars:30|default:"暂无" }}</td>
                                 <td>{{ record.treatment|truncatechars:30|default:"暂无" }}</td>
+
                                 <td>
-                                    <a href="{% url 'patient_medical_record_detail' record.pk %}" 
-                                       class="btn btn-primary btn-sm"
-                                       data-bs-toggle="tooltip"
-                                       title="查看详情">
-                                        <i class="fas fa-file-medical"></i>
-                                    </a>
+                                    <a href={% url 'patient_medical_record_detail' record.id %} class="btn btn-primary btn-sm">查看详情</a>
                                 </td>
                             </tr>
                             {% empty %}

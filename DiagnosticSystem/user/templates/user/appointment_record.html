@@ -44,7 +44,7 @@
                                         </td>
                                         <td>{{ appointment.notes|default:"无" }}</td>
                                         <td>
-                                            {% if appointment.status == 'pending' %}
+                                            {% if appointment.status == 'pending' or appointment.status == 'confirmed' %}
                                             <a href="{% url 'cancel_appointment' appointment.id %}" class="btn btn-danger btn-sm">取消预约</a>
                                             {% endif %}
                                         </td>

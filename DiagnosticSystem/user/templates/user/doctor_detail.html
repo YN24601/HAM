@@ -64,14 +64,14 @@
                                             <td>{{ schedule.start_time }}</td>
                                             <td>{{ schedule.end_time }}</td>
                                             <td>
-                                                {% if schedule.avaliable %}
+                                                {% if schedule.checkAvailable %}
                                                     <span class="badge bg-success">可预约</span>
                                                 {% else %}
                                                     <span class="badge bg-danger">已满</span>
                                                 {% endif %}
                                             </td>
                                             <td>
-                                                {% if schedule.avaliable %}
+                                                {% if schedule.checkAvailable %}
                                                     {% if user_appointment and user_appointment.doctor_schedule.id == schedule.id %}
                                                         <!-- 如果患者已预约该排班 -->
                                                         <a href="{% url 'cancel_appointment' user_appointment.id %}" class="btn btn-danger btn-sm">取消预约</a>                                                           
@@ -79,9 +79,13 @@
                                                         <!-- 如果患者未预约该排班 -->
                                                         <a href="{% url 'book_appointment' schedule.id %}" class="btn btn-primary btn-sm">预约</a>
                                                     {% endif %}
-                                                {% else %}
-                                                    <!-- 如果排班已满 -->
-                                                    <button class="btn btn-secondary btn-sm" disabled>已满</button>
+                                                {% elif user_appointment and user_appointment.doctor_schedule.id == schedule.id %}
+                                                        <!-- 如果患者已预约该排班 -->
+                                                        <a href="{% url 'cancel_appointment' user_appointment.id %}" class="btn btn-danger btn-sm">取消预约</a>                                                           
+                                                {% else %}    
+                                                <!-- 如果排班已满 -->
+
+                                                <button class="btn btn-secondary btn-sm" disabled>已满</button>
                                                 {% endif %}
                                             </td>
                                         </tr>

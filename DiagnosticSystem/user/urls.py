@@ -43,8 +43,11 @@ urlpatterns = [
     # 接诊
     path('check_appointment/', views.CheckAppointmentView.as_view(), name='check_appointment'),
     path('confirm_appointment/<int:pk>/', views.confirm_appointment, name='confirm_appointment'),
+    path('reject_appointment/<int:pk>/', views.reject_appointment, name='reject_appointment'),
     path('consultation/<int:appointment_id>/', views.ConsultationView.as_view(), name='doctor_consultation'),
     path('upload_image/', views.upload_image, name='upload_image'),
     path('medical_records/', views.MedicalRecordListView.as_view(), name='doctor_medical_records'),
     path('medical_record_detail/<int:record_id>/', views.MedicalRecordDetailView.as_view(), name='medical_record_detail'),
+    path('appointment_records/', views.DoctorAppointmentListView.as_view(), name='doctor_appointment_records'),
+    path('appointment_detail/<int:pk>/', views.AppointmentDetailView.as_view(), name='doctor_appointment_detail'),
 ]

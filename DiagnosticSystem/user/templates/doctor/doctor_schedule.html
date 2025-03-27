@@ -16,10 +16,10 @@
                         <!-- 筛选按钮 -->
                         <div class="mb-4">
                             <a href="?available=1" class="btn btn-success me-2">
-                                <i class="bi bi-check-circle"></i> 可预约
+                                <i class="bi bi-check-circle"></i> 有空余
                             </a>
                             <a href="?available=0" class="btn btn-danger me-2">
-                                <i class="bi bi-x-circle"></i> 不可预约
+                                <i class="bi bi-x-circle"></i> 无空余
                             </a>
                             <a href="?" class="btn btn-secondary">
                                 <i class="bi bi-list"></i> 全部
@@ -34,7 +34,7 @@
                                         <th>日期</th>
                                         <th>开始时间</th>
                                         <th>结束时间</th>
-                                        <th>可预约</th>
+                                        <th>有空余</th>
                                         <th>最大患者数</th>
                                         <th>已预约患者数</th>
                                         <th>操作</th>
@@ -47,7 +47,7 @@
                                         <td>{{ schedule.start_time }}</td>
                                         <td>{{ schedule.end_time }}</td>
                                         <td>
-                                            {% if schedule.avaliable %}
+                                            {% if schedule.is_available %}
                                                 <span class="badge bg-success">是</span>
                                             {% else %}
                                                 <span class="badge bg-danger">否</span>
@@ -60,9 +60,9 @@
                                             {% comment %} <a href="#" class="btn btn-primary me-2"> {% endcomment %}
                                                 <i class="bi bi-pencil-square"></i> 编辑
                                             </a>
-                                            <a href="{% url 'doctor_schedule_delete' schedule.id %}" class="btn btn-danger">
+                                            {% comment %} <a href="{% url 'doctor_schedule_delete' schedule.id %}" class="btn btn-danger">
                                                 <i class="bi bi-trash"></i> 删除
-                                            </a>
+                                            </a> {% endcomment %}
                                         </td>
                                     </tr>
                                     {% endfor %}
