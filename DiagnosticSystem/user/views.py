@@ -225,6 +225,7 @@ class DoctorListView(TemplateView):
         patient_id = self.request.session.get('patient_id')
         context['patient'] = Patient.objects.get(id=patient_id)
         return context
+
 class DoctorDetailView(TemplateView):
     template_name = 'user/doctor_detail.html'
     def get_context_data(self, **kwargs):
@@ -234,7 +235,11 @@ class DoctorDetailView(TemplateView):
         # 获取医生对象
         doctor = Doctor.objects.get(id=doctor_id)
         # 获取医生的排班信息
-        schedules = DoctorSchedule.objects.filter(doctor=doctor, is_expired=False).order_by('date', 'start_time')
+        schedules = DoctorSchedule.objects.filter(doctor=doctor, is_expired=False).order_by('date', 'start_time')        
+        now = datetime.now()
+        self._update_expired_status(schedules, now)
+        schedules = schedules.filter(is_expired=False)
+        
         # 将医生和排班信息
         context['doctor'] = doctor
         context['schedules'] = schedules
@@ -248,6 +253,19 @@ class DoctorDetailView(TemplateView):
         context['user_appointment'] = user_appointment
         print(user_appointment)
         return context
+    
+    def _update_expired_status(self, schedules, now):
+        """更新排班的过期状态"""
+        # 批量获取需要更新的排班
+        to_update = []
+        for schedule in schedules:
+            if schedule.date < now.date():
+                schedule.is_expired = True
+                to_update.append(schedule)
+        
+        # 批量更新
+        if to_update:
+            DoctorSchedule.objects.bulk_update(to_update, ['is_expired'])
 
 def book_appointment(request, pk):
     schedule = get_object_or_404(DoctorSchedule, id=pk)
@@ -315,6 +333,7 @@ class AppointmentRecordView(ListView):
 
 class ScheduleListView(TemplateView):
     template_name = 'user/schedule_list.html'  # 模板路径
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -325,6 +344,10 @@ class ScheduleListView(TemplateView):
 
         # 初始化表单
         form = ScheduleFilterForm(self.request.GET or None)
+        
+        # 获取当前日期时间，避免多次调用
+        now = datetime.now()
+        
         if form.is_valid():
             name = form.cleaned_data.get('name')
             gender = form.cleaned_data.get('gender')
@@ -349,16 +372,44 @@ class ScheduleListView(TemplateView):
             query &= Q(is_expired=False)
 
             schedules = DoctorSchedule.objects.filter(query)
+            # 只对筛选出的排班进行过期检查
+            self._update_expired_status(schedules, now)
+
+            # 重新过滤掉已过期的排班
+            schedules = schedules.filter(is_expired=False)
+            
             context['schedules'] = schedules
             context['form'] = form
         else:
             query = Q()
             query &= Q(is_available=True)
             query &= Q(is_expired=False)
+            
             schedules = DoctorSchedule.objects.filter(query)
+            
+            # 只对筛选出的排班进行过期检查
+            self._update_expired_status(schedules, now)
+            
+            # 重新过滤掉已过期的排班
+            schedules = schedules.filter(is_expired=False)
+            
             context['schedules'] = schedules
             context['form'] = form
+            
         return context
+    
+    def _update_expired_status(self, schedules, now):
+        """更新排班的过期状态"""
+        # 批量获取需要更新的排班
+        to_update = []
+        for schedule in schedules:
+            if schedule.date < now.date():
+                schedule.is_expired = True
+                to_update.append(schedule)
+        
+        # 批量更新
+        if to_update:
+            DoctorSchedule.objects.bulk_update(to_update, ['is_expired'])
 
 class PatientMedicalRecordListView(LoginRequiredMixin, ListView):
     model = MedicalRecord
@@ -535,6 +586,11 @@ class DoctorScheduleView(LoginRequiredMixin, TemplateView):
         else:
             schedules = DoctorSchedule.objects.filter(doctor=doctor, is_expired=False).order_by('date', 'start_time')
         
+
+        now = datetime.now()
+        self._update_expired_status(schedules, now)
+        schedules = schedules.filter(is_expired=False)
+
         # 创建表单实例
         form = DoctorScheduleForm()
         
@@ -543,6 +599,19 @@ class DoctorScheduleView(LoginRequiredMixin, TemplateView):
             'doctor': doctor,
             'form': form
         })
+
+    def _update_expired_status(self, schedules, now):
+        """更新排班的过期状态"""
+        # 批量获取需要更新的排班
+        to_update = []
+        for schedule in schedules:
+            if schedule.date < now.date():
+                schedule.is_expired = True
+                to_update.append(schedule)
+        
+        # 批量更新
+        if to_update:
+            DoctorSchedule.objects.bulk_update(to_update, ['is_expired'])
 
     def post(self, request):
         doctor_id = request.session.get('doctor_id')
