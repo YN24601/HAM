@@ -51,7 +51,7 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-end text-small shadow">
               <li><a class="dropdown-item" href={% url 'profile'%}>个人信息</a></li>
-              <li><a class="dropdown-item" href="#">修改密码</a></li>
+              <li><a class="dropdown-item" href={% url "change_password" %}>修改密码</a></li>
               <li><a class="dropdown-item" href={% url 'appointment_record' %}>预约记录</a></li>
               <li><a class="dropdown-item" href={% url "patient_medical_records" %}>就诊记录</a></li>
               <li><hr class="dropdown-divider"></li>

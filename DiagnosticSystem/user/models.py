@@ -3,6 +3,8 @@ from django.contrib.auth.hashers import make_password  # 用于密码加密
 from django.core.validators import RegexValidator
 from datetime import datetime, timezone
 
+
+
 gender_choices = [
     ('M', '男'),
     ('F', '女'),
@@ -16,9 +18,7 @@ class Patient(models.Model):
         validators=[RegexValidator(regex='^[0-9]{11}$', message='手机号必须为11位数字')])
     email = models.EmailField('邮箱', max_length=100, unique=True)    
     password = models.CharField('密码', max_length=128)  # 加密后的密码
-    # avatar = models.CharField('头像', max_length=100, default='static/images/default_user.jpg')
     avatar = models.ImageField('头像', upload_to='avatars/patients/', default='avatars/patients/default_patient.jpg')
-    # avatar = models.CharField('头像', max_length=100, default='/Users/yanazhang/Documents/vscodeProjects/pythonProjects/HAM/DiagnosticSystem/static/images/default_user.jpg')
     created_at = models.DateTimeField('创建时间', auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField('更新时间', auto_now=True, null=True, blank=True)
 

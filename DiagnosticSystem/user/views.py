@@ -15,6 +15,7 @@ from datetime import date, timedelta, datetime
 from django.utils import timezone
 
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.utils.decorators import method_decorator
 
 import torch
@@ -24,13 +25,78 @@ import torch.nn.functional as F
 from PIL import Image
 import os
 
+import random
+from django.core.cache import cache
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+
+def send_verification_code(request):
+    if request.method == 'GET':
+        mobile = request.GET.get('mobile', '')
+        code = str(random.randint(100000, 999999))
+        # 将验证码与手机号关联存储（使用session或缓存）
+        request.session['sms_verification_code'] = code
+        request.session['sms_mobile'] = mobile  # 存储手机号以便后续验证
+        # print("session:", request.session.get('sms_verification_code'), request.session.get('sms_mobile'))
+        print(f"模拟发送短信验证码到{mobile}，验证码为：{code}")
+        return JsonResponse({'status': 'success', 'message': '验证码已发送'})
+    return JsonResponse({'status': 'failed', 'message': '请求方式错误'}, status=400)
+
+def change_password(request):
+    """
+    用户登录状态下的密码修改视图：
+    通过短信验证码验证手机号，并对新密码进行二次确认后修改密码。
+    """
+
+    # 获取当前登录用户（假设为Patient模型实例）
+    user = Patient.objects.get(id=request.session.get('patient_id'))
+    mobile = user.mobile
+    request.session['sms_mobile'] = mobile  # 存储手机号以便后续验证
+    if request.method == 'POST':
+        sms_code = request.POST.get('sms_code')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        # 检查必填项是否齐全
+        if not all([sms_code, new_password, confirm_password]):
+            return render(request, 'user/change_password.html', {'error': '请填写所有必填项', 'patient': user})
+
+        # 检查两次输入的新密码是否一致
+        if new_password != confirm_password:
+            return render(request, 'user/change_password.html', {'error': '两次输入的密码不一致', 'patient': user})
+
+        # 验证短信验证码
+        session_code = request.session.get('sms_verification_code')
+        if not session_code or sms_code != session_code:
+            return render(request, 'user/change_password.html', {'error': '验证码错误或已过期', 'patient': user})
+
+        # 设置新密码（内部会自动加密）
+        user.set_password(new_password)
+        user.save()
+
+        # 修改成功后清除验证码，避免重复使用
+        if 'sms_verification_code' in request.session:
+            del request.session['sms_verification_code']
+        if 'sms_mobile' in request.session:
+            del request.session['sms_mobile']
+
+        # 密码修改成功后可重定向到用户中心或登录页
+        return redirect('profile') 
+
+    return render(request, 'user/change_password.html', {'patient': user})
+
 # 用户注册
 class PatientCreateView(CreateView):
     model = Patient
     form_class = PatientCreationForm
     template_name = 'user/patient_form.html'
-    # 用户注册成功 转跳到登陆页面
     success_url = '/user/login/'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request  # 传递request给表单
+        return kwargs
 
 # 用户登录
 class PatientLoginView(FormView):
@@ -83,7 +149,7 @@ def PatientLogout(request):
     # return HttpResponseRedirect(reverse('user_login'))
     return HttpResponseRedirect(reverse('home'))
 
-# PatientProfileView
+# 用户个人信息和修改
 class PatientProfileView(LoginRequiredMixin, UpdateView):
     template_name = 'user/patient_profile.html'
     form_class = PatientForm
@@ -93,7 +159,7 @@ class PatientProfileView(LoginRequiredMixin, UpdateView):
         return Patient.objects.get(id=patient_id)
     
     def get_success_url(self):
-        return reverse('patient_profile') 
+        return reverse('profile') 
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -101,10 +167,6 @@ class PatientProfileView(LoginRequiredMixin, UpdateView):
         # patient = Patient.objects.get(id=patient_id)
         context['patient'] = self.object
         return context
-    # def form_valid(self, form):
-    #     print('上传的文件:', self.request.FILES)  # 检查文件是否上传
-    #     print('表单数据:', form.cleaned_data)    # 检查处理后的数据
-    #     return super().form_valid(form)
 
 ################## 静态 - 皮肤病介绍 ###################
 class DiseaseViewForUser(TemplateView):
@@ -991,3 +1053,41 @@ class AppointmentDetailView(LoginRequiredMixin, DetailView):
         doctor = Doctor.objects.get(id=doctor_id)
         context['doctor'] = doctor
         return context
+
+def doctor_change_password(request):
+    """
+    用户登录状态下的密码修改视图：
+    通过短信验证码验证手机号，并对新密码进行二次确认后修改密码。
+    """
+    doctor_id = request.session.get('doctor_id')
+    user = Doctor.objects.get(id=doctor_id)
+    if request.method == 'POST':
+        sms_code = request.POST.get('sms_code')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        # 检查必填项是否齐全
+        if not all([sms_code, new_password, confirm_password]):
+            return render(request, 'doctor/change_password.html', {'error': '请填写所有必填项', 'doctor': user})
+
+        # 检查两次输入的新密码是否一致
+        if new_password != confirm_password:
+            return render(request, 'doctor/change_password.html', {'error': '两次输入的密码不一致', 'doctor': user})
+
+        # 验证短信验证码
+        session_code = request.session.get('sms_verification_code')
+        if not session_code or sms_code != session_code:
+            return render(request, 'doctor/change_password.html', {'error': '验证码错误或已过期', 'doctor': user})
+
+        # 设置新密码（内部会自动加密）
+        user.set_password(new_password)
+        user.save()
+
+        # 修改成功后清除验证码，避免重复使用
+        if 'sms_verification_code' in request.session:
+            del request.session['sms_verification_code']
+
+        # 密码修改成功后可重定向到用户中心或登录页
+        return redirect('profile')  # 请根据实际路由调整
+
+    return render(request, 'doctor/change_password.html', {'doctor': user})

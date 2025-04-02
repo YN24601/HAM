@@ -4,11 +4,14 @@ from . import views
 
 # user/
 urlpatterns = [
+    path('send_verification_code/', views.send_verification_code, name='send_verification_code'),
     path('login/', views.PatientLoginView.as_view(), name='user_login'),
     path('register/', views.PatientCreateView.as_view(), name='patient_create'),
     path('home/', views.PatientHomeView.as_view(), name='dashboard'),
     path('logout/', views.PatientLogout, name='patient_logout'),
     path("profile/", views.PatientProfileView.as_view(), name="profile"),
+    path('change_password/', views.change_password, name='change_password'),
+
     # 主页静态页面
     path("disease_intro/", views.DiseaseViewForUser.as_view(), name="disease_intro_for_users"),
     path('disease_intro/akiec', views.AKIECView.as_view(), name='akiec'),
@@ -36,6 +39,7 @@ urlpatterns = [
     path('doctor_home/', views.DoctorHomeView.as_view(), name='doctor_home'),
     path('doctor_logout/', views.DoctorLogout, name='doctor_logout'),
     path('doctor_profile/', views.DoctorProfileView.as_view(), name='doctor_profile'),
+    path('doctor_change_password/', views.doctor_change_password, name='doctor_change_password'),
     # 排班
     path('doctor_schedule/', views.DoctorScheduleView.as_view(), name='doctor_schedule'),
     path('doctor_schedule/delete/<int:pk>/', views.DoctorScheduleDelete, name='doctor_schedule_delete'),

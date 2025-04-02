@@ -62,7 +62,7 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-end text-small shadow">
               <li><a class="dropdown-item" href={% url 'doctor_profile' %}>个人信息</a></li>
-              <li><a class="dropdown-item" href="#">修改密码</a></li>
+              {% comment %} <li><a class="dropdown-item" href={% url "doctor_change_password" %}>修改密码</a></li> {% endcomment %}
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href={% url 'doctor_logout' %}>退出系统</a></li>
             </ul>
