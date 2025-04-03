@@ -4,14 +4,15 @@ from . import views
 
 # user/
 urlpatterns = [
-    path('send_verification_code/', views.send_verification_code, name='send_verification_code'),
     path('login/', views.PatientLoginView.as_view(), name='user_login'),
     path('register/', views.PatientCreateView.as_view(), name='patient_create'),
     path('home/', views.PatientHomeView.as_view(), name='dashboard'),
     path('logout/', views.PatientLogout, name='patient_logout'),
     path("profile/", views.PatientProfileView.as_view(), name="profile"),
+    path('send_verification_code/', views.send_verification_code, name='send_verification_code'),
     path('change_password/', views.change_password, name='change_password'),
-
+    path('send_verification_code_for_change_mobile/', views.send_verification_code_for_change_mobile, name='send_verification_code_for_change_mobile'),
+    path('change_mobile/', views.change_mobile, name='change_mobile'),
     # 主页静态页面
     path("disease_intro/", views.DiseaseViewForUser.as_view(), name="disease_intro_for_users"),
     path('disease_intro/akiec', views.AKIECView.as_view(), name='akiec'),

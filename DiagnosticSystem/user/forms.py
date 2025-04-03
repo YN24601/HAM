@@ -127,34 +127,32 @@ class PatientLoginForm(forms.Form):
 from django.core.validators import RegexValidator
 
 class PatientForm(forms.ModelForm):
-    mobile = forms.CharField(
-        validators=[
-            RegexValidator(
-                regex=r'^1[3-9]\d{9}$',
-                message='请输入有效的11位手机号码'
-            )
-        ],
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'pattern': '^1[3-9]\\d{9}$',
-            'title': '请输入有效的11位手机号码'
-        })
-    )
+    # mobile = forms.CharField(
+    #     validators=[
+    #         RegexValidator(
+    #             regex=r'^1[3-9]\d{9}$',
+    #             message='请输入有效的11位手机号码'
+    #         )
+    #     ],
+    #     widget=forms.TextInput(attrs={
+    #         'class': 'form-control',
+    #         'pattern': '^1[3-9]\\d{9}$',
+    #         'title': '请输入有效的11位手机号码'
+    #     })
+    # )
 
     class Meta:
         model = Patient
         fields = ['idcard', 'name', 'gender', 'mobile', 'email', 'avatar']
         widgets = {
             'idcard': forms.TextInput(attrs={'readonly': True, 'class': 'form-control bg-light'}),
+            # 'idcard': forms.TextInput(attrs={'class': 'form-control'}),
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            # 'gender': forms.Select(attrs={'class': 'form-control bg-light', 'disabled': True}, choices=[
-            #     ('M', '男'),
-            #     ('F', '女'),
-            # ]),
             'gender': forms.Select(attrs={'class': 'form-select'}, choices=[
                 ('M', '男'),
                 ('F', '女'),
             ]),
+            'mobile': forms.TextInput(attrs={'readonly': True, 'class': 'form-control bg-light'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'avatar': forms.FileInput(attrs={
                 'class': 'form-control',

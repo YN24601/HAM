@@ -38,7 +38,6 @@ def send_verification_code(request):
         # 将验证码与手机号关联存储（使用session或缓存）
         request.session['sms_verification_code'] = code
         request.session['sms_mobile'] = mobile  # 存储手机号以便后续验证
-        # print("session:", request.session.get('sms_verification_code'), request.session.get('sms_mobile'))
         print(f"模拟发送短信验证码到{mobile}，验证码为：{code}")
         return JsonResponse({'status': 'success', 'message': '验证码已发送'})
     return JsonResponse({'status': 'failed', 'message': '请求方式错误'}, status=400)
@@ -85,6 +84,62 @@ def change_password(request):
         return redirect('profile') 
 
     return render(request, 'user/change_password.html', {'patient': user})
+
+def send_verification_code_for_change_mobile(request):
+    """发送验证码用于修改手机号"""
+    if request.method == 'GET':
+        # 获取当前用户
+        user = Patient.objects.get(id=request.session.get('patient_id'))
+        old_mobile = user.mobile
+        new_mobile = request.GET.get('new_mobile', '')
+        
+        # 检查新手机号是否已被使用
+        if Patient.objects.filter(mobile=new_mobile).exclude(id=user.id).exists():
+            return JsonResponse({'status': 'failed', 'message': '该手机号已被注册'}, status=400)
+        
+        # 生成验证码
+        code = str(random.randint(100000, 999999))
+        
+        # 存储验证码和手机号到session
+        request.session['change_mobile_verification_code'] = code
+        request.session['old_mobile'] = old_mobile
+        request.session['new_mobile'] = new_mobile
+        
+        # 模拟发送短信验证码
+        print(f"模拟发送短信验证码到{new_mobile}，验证码为：{code}")
+        return JsonResponse({'status': 'success', 'message': '验证码已发送'})
+    
+    return JsonResponse({'status': 'failed', 'message': '请求方式错误'}, status=400)
+
+def change_mobile(request):
+    """修改手机号视图"""
+    user = Patient.objects.get(id=request.session.get('patient_id'))
+    
+    if request.method == 'POST':
+        sms_code = request.POST.get('sms_code')
+        new_mobile = request.session.get('new_mobile')
+        
+        # 检查必填项
+        if not all([sms_code, new_mobile]):
+            return render(request, 'user/change_mobile.html', {'error': '请填写所有必填项', 'patient': user})
+        
+        # 验证短信验证码
+        session_code = request.session.get('change_mobile_verification_code')
+        if not session_code or sms_code != session_code:
+            return render(request, 'user/change_mobile.html', {'error': '验证码错误或已过期', 'patient': user})
+        
+        # 更新手机号
+        user.mobile = new_mobile
+        user.save()
+        
+        # 清除session中的验证信息
+        for key in ['change_mobile_verification_code', 'old_mobile', 'new_mobile']:
+            if key in request.session:
+                del request.session[key]
+        
+        return redirect('profile')
+    
+    return render(request, 'user/change_mobile.html', {'patient': user})
 
 # 用户注册
 class PatientCreateView(CreateView):
