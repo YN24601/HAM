@@ -7,7 +7,9 @@ For more information on this file, see
 https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
 """
 
-import os
+import sys, os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))  # 将项目根目录加入路径
+# import os
 
 from django.core.wsgi import get_wsgi_application
 

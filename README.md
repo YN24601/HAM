@@ -7,8 +7,6 @@
 
 # 今日
 预约记录-患者端和医生端更新过期状态
-用户修改电话信息需要手机号验证
-
 封装模型分类
 
 # TODO
@@ -17,34 +15,28 @@
   模型、数据集
 模型更新
 
-- 用户
-  - 模型
-    - 时间表 存储医生的可预约时间
-    - 预约表
-    - 诊疗记录表
-  - 注册
-    - 注册页面数据验证
-    - 注册页面验证提示
-    - 验证码
-  - 主页
-    - 消息提醒（django的signals）
-    - 个人信息
-      - 修改个人信息
-      - 修改密码
-      - 诊疗记录
-      - 注销
-    - 导航栏
-      - 皮肤病介绍 皮肤病详情页面
-      - ai诊断
-      - 医师团队
-      - 预约问诊
-- 医生
-  - 页面
-    - 首页
-      - 预约管理
-      - 预约信息
-      - 接诊页面
-      - 诊疗记录（病人、时间等）
+项目结构
+
+DiagnosticSystem
+|-- DiagnosticSystem
+|   |-- __init__.py
+|   |-- settings.py
+|   |-- urls.py
+|   |-- wsgi.py
+|   |-- views.py(要使用ai_service.py)
+|-- services
+|   |-- __init__.py
+|   |-- ai_service.py
+|-- user
+|   |-- __init__.py
+|   |-- admin.py
+|   |-- apps.py
+|   |-- models.py
+|   |-- tests.py
+|   |-- views.py(要使用ai_service.py)
+|-- manage.py
+|-- README.md
+
 
 # 1.需求分析
 

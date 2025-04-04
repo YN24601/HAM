@@ -10,6 +10,7 @@ CUSTOM_MESSAGE_LEVEL = 10  # 自定义消息级别
 from .models import Patient, Doctor, DoctorSchedule, Appointment, AppointmentStatus, MedicalRecord
 from .forms import PatientCreationForm, PatientLoginForm, PatientForm, DoctorFilterForm, ScheduleFilterForm
 from .forms import DoctorLoginForm, DoctorForm, DoctorScheduleForm, MedicalRecordForm
+from services.ai_service import AISkinDiagnosisService
 from DiagnosticSystem.mixins import LoginRequiredMixin
 from datetime import date, timedelta, datetime
 from django.utils import timezone
@@ -811,8 +812,13 @@ def reject_appointment(request, pk):
 
     return redirect('check_appointment')
 
+
 class ConsultationView(LoginRequiredMixin, TemplateView):
-    template_name = 'doctor/consultation.html'  # 模板可以继承 doctor/doctor_home.html
+    template_name = 'doctor/consultation.html'
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.ai_service = AISkinDiagnosisService()
 
     def get(self, request, *args, **kwargs):
         appointment = get_object_or_404(Appointment, id=kwargs['appointment_id'])
@@ -826,13 +832,12 @@ class ConsultationView(LoginRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         appointment = get_object_or_404(Appointment, id=kwargs['appointment_id'])
         action = request.POST.get('action')
-        # 注意：这里构造表单时包含 request.FILES
         form = MedicalRecordForm(request.POST, request.FILES)
         doctor_id = request.session.get('doctor_id')
         doctor = Doctor.objects.get(id=doctor_id)
-        # 尝试从隐藏字段中获取之前计算的 AI 建议
         ai_diagnosis = request.POST.get('ai_diagnosis', '')
         top_predictions = None
+        
         if action == 'save':
             if form.is_valid():
                 record = form.save(commit=False)
@@ -840,7 +845,6 @@ class ConsultationView(LoginRequiredMixin, TemplateView):
                 record.ai_diagnosis = ai_diagnosis
                 record.save()
                 appointment.complete()
-                # 保存成功后可跳转到记录详情或其他页面
                 return redirect('medical_record_detail', record_id=record.pk)
             else:
                 context = {
@@ -851,18 +855,17 @@ class ConsultationView(LoginRequiredMixin, TemplateView):
                 }
                 return self.render_to_response(context)
         else:
-            # 如果没有特定 action，则返回原页面
             context = {'appointment': appointment, 'form': form, 'doctor': doctor}
             return self.render_to_response(context)
 
-@csrf_exempt  # 如果使用 AJAX，请确保正确处理 CSRF（建议使用 AJAX 时传递 CSRF token）
+@csrf_exempt
 def upload_image(request):
     if request.method == 'POST':
         upload_file = request.FILES.get('image')
         if not upload_file:
             return JsonResponse({'error': '未上传图片'}, status=400)
         
-        # 保存文件到 MEDIA_ROOT，可生成唯一文件名避免冲突
+        # 保存文件
         file_name = upload_file.name
         file_path = os.path.join(settings.MEDIA_ROOT, file_name)
         with open(file_path, 'wb') as f:
@@ -870,48 +873,13 @@ def upload_image(request):
                 f.write(chunk)
         
         try:
-            # 加载模型并处理图像（这里参考你的模型代码）
-            model = models.mobilenet_v2(pretrained=False)
-            num_classes = 7
-            model.classifier[1] = torch.nn.Linear(model.classifier[1].in_features, num_classes)
-            model.load_state_dict(torch.load('model/mobilenetv2_model.pth', map_location=torch.device('cpu')))
-            model.eval()
-
-            preprocess = transforms.Compose([
-                transforms.Resize((224, 224)),
-                transforms.ToTensor(),
-                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-            ])
-            image = Image.open(file_path)
-            input_tensor = preprocess(image)
-            input_batch = input_tensor.unsqueeze(0)
-            device = torch.device("cpu")
-            model.to(device)
-            input_batch = input_batch.to(device)
-
-            with torch.no_grad():
-                output = model(input_batch)
-            probabilities = F.softmax(output, dim=1)[0]
-            top_probabilities, top_indices = torch.topk(probabilities, 3)
-            class_names = ['akiec', 'bcc', 'bkl', 'df', 'mel', 'nv', 'vasc']
-
-            top_predictions = []
-            for i in range(3):
-                class_name = class_names[top_indices[i].item()]
-                probability = top_probabilities[i].item() * 100
-                top_predictions.append({
-                    'class_name': class_name,
-                    'probability': round(probability, 2)
-                })
-
-            # 取最高概率的结果作为 AI 诊断建议
-            ai_diagnosis = top_predictions[0]['class_name']
-
-            # 返回 JSON 数据：包含预测结果、AI建议及图片引用（这里直接返回文件路径）
+            ai_service = AISkinDiagnosisService()
+            result = ai_service.predict_image(file_path)
+            
             return JsonResponse({
-                'ai_diagnosis': ai_diagnosis,
-                'top_predictions': top_predictions,
-                'image_url': file_name  # 或者生成一个完整 URL
+                'ai_diagnosis': result['ai_diagnosis'],
+                'top_predictions': result['top_predictions'],
+                'image_url': file_name
             })
         except Exception as e:
             return JsonResponse({'error': f'图像处理错误：{str(e)}'}, status=500)
