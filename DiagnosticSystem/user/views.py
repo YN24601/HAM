@@ -3,34 +3,23 @@ from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.views import View
 from django.views.generic import TemplateView, CreateView, FormView, UpdateView, ListView, DetailView
+from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 CUSTOM_MESSAGE_LEVEL = 10  # 自定义消息级别
 from .models import Patient, Doctor, DoctorSchedule, Appointment, AppointmentStatus, MedicalRecord
 from .forms import PatientCreationForm, PatientLoginForm, PatientForm, DoctorFilterForm, ScheduleFilterForm
 from .forms import DoctorLoginForm, DoctorForm, DoctorScheduleForm, MedicalRecordForm
+
 from services.ai_service import AISkinDiagnosisService
 from DiagnosticSystem.mixins import LoginRequiredMixin
+
 from datetime import date, timedelta, datetime
 from django.utils import timezone
 
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
-from django.utils.decorators import method_decorator
-
-import torch
-import torchvision.models as models
-from torchvision import transforms
-import torch.nn.functional as F
-from PIL import Image
 import os
-
 import random
-from django.core.cache import cache
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
+
 
 def send_verification_code(request):
     if request.method == 'GET':
@@ -49,7 +38,7 @@ def change_password(request):
     通过短信验证码验证手机号，并对新密码进行二次确认后修改密码。
     """
 
-    # 获取当前登录用户（假设为Patient模型实例）
+    # 获取当前登录用户
     user = Patient.objects.get(id=request.session.get('patient_id'))
     mobile = user.mobile
     request.session['sms_mobile'] = mobile  # 存储手机号以便后续验证
@@ -198,11 +187,10 @@ class PatientHomeView(TemplateView):
         # 渲染模板，并将patient对象传递给模板
         return render(request, 'user/patient_home.html', {'patient': patient})
 
-# 用户注销
+# 用户登出
 def PatientLogout(request):
     # 清除会话
     request.session.flush()
-    # return HttpResponseRedirect(reverse('user_login'))
     return HttpResponseRedirect(reverse('home'))
 
 # 用户个人信息和修改

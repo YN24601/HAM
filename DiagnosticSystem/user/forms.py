@@ -95,7 +95,7 @@ class PatientCreationForm(forms.ModelForm):
         return cleaned_data
 
     def clean_password2(self):
-        # 保持原有的密码验证逻辑
+        # 密码验证
         password1 = self.cleaned_data.get('password1')
         password2 = self.cleaned_data.get('password2')
         if password1 != password2:
