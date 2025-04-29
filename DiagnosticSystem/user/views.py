@@ -601,6 +601,12 @@ class PatientMedicalRecordDetailView(LoginRequiredMixin, DetailView):
     model = MedicalRecord
     template_name = 'user/patient_medical_record_detail.html'
     context_object_name = 'record'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        patient_id = self.request.session.get('patient_id')
+        patient = Patient.objects.get(id=patient_id)
+        context['patient'] = patient
+        return context
 
     def get_queryset(self):
         patient_id = self.request.session.get('patient_id')
@@ -811,9 +817,12 @@ class ConsultationView(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         appointment = get_object_or_404(Appointment, id=kwargs['appointment_id'])
         form = MedicalRecordForm()
+        doctor_id = request.session.get('doctor_id')
+        doctor = Doctor.objects.get(id=doctor_id)
         context = {
             'appointment': appointment,
             'form': form,
+            'doctor': doctor,
         }
         return self.render_to_response(context)
 
