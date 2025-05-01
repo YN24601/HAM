@@ -22,6 +22,8 @@ urlpatterns = [
     path('disease_intro/nv', views.NVView.as_view(), name='nv'),
     path('disease_intro/mel', views.MELView.as_view(), name='mel'),
     path('disease_intro/vasc', views.VASCView.as_view(), name='vasc'),
+    path('dataset/', views.DatasetView.as_view(), name='dataset'),
+    path('model/', views.ModelView.as_view(), name='model'),
     # 医生信息&预约
     path('doctors_list/', views.DoctorListView.as_view(), name='doctors_list'),
     path('doctor_detail/<int:pk>/', views.DoctorDetailView.as_view(), name='doctor_detail'),

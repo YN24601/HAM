@@ -227,55 +227,45 @@ class DiseaseViewForUser(TemplateView):
         return render(request, 'user/disease_intro_for_users.html', {'patient': patient})
 
 class AKIECView(LoginRequiredMixin, TemplateView):
-    template_name = 'user/success.html'
     def get(self, request, *args, **kwargs):
-        # 检查是否是 AJAX 请求
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'status': 'authenticated'})
-        return super().get(request, *args, **kwargs)
+        patient = Patient.objects.get(id=request.session.get('patient_id'))
+        return render(request, 'user/disease_akiec.html', {'patient': patient})
     
 class BCCView(LoginRequiredMixin, TemplateView):
-    template_name = 'user/success.html'
     def get(self, request, *args, **kwargs):
-        # 检查是否是 AJAX 请求
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'status': 'authenticated'})
-        return super().get(request, *args, **kwargs)
+        patient = Patient.objects.get(id=request.session.get('patient_id'))
+        return render(request, 'user/disease_bcc.html', {'patient': patient})
+
 class BKLView(LoginRequiredMixin, TemplateView):
-    template_name = 'user/success.html'
     def get(self, request, *args, **kwargs):
-        # 检查是否是 AJAX 请求
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'status': 'authenticated'})
-        return super().get(request, *args, **kwargs)
+        patient = Patient.objects.get(id=request.session.get('patient_id'))
+        return render(request, 'user/disease_bkl.html', {'patient': patient})
 class DFView(LoginRequiredMixin, TemplateView):
-    template_name = 'user/success.html'
     def get(self, request, *args, **kwargs):
-        # 检查是否是 AJAX 请求
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'status': 'authenticated'})
-        return super().get(request, *args, **kwargs)
+        patient = Patient.objects.get(id=request.session.get('patient_id'))
+        return render(request, 'user/disease_df.html', {'patient': patient})
 class NVView(LoginRequiredMixin, TemplateView):
-    template_name = 'user/success.html'
     def get(self, request, *args, **kwargs):
-        # 检查是否是 AJAX 请求
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'status': 'authenticated'})
-        return super().get(request, *args, **kwargs)
+        patient = Patient.objects.get(id=request.session.get('patient_id'))
+        return render(request, 'user/disease_nv.html', {'patient': patient})
 class MELView(LoginRequiredMixin, TemplateView):
-    template_name = 'user/success.html'
     def get(self, request, *args, **kwargs):
-        # 检查是否是 AJAX 请求
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'status': 'authenticated'})
-        return super().get(request, *args, **kwargs)
+        patient = Patient.objects.get(id=request.session.get('patient_id'))
+        return render(request, 'user/disease_mel.html', {'patient': patient})
 class VASCView(LoginRequiredMixin, TemplateView):
-    template_name = 'user/success.html'
     def get(self, request, *args, **kwargs):
-        # 检查是否是 AJAX 请求
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'status': 'authenticated'})
-        return super().get(request, *args, **kwargs)
+        patient = Patient.objects.get(id=request.session.get('patient_id'))
+        return render(request, 'user/disease_vasc.html', {'patient': patient})
+
+class DatasetView(TemplateView):
+    def get(self, request, *args, **kwargs):
+        patient = Patient.objects.get(id=request.session.get('patient_id'))
+        return render(request, 'user/dataset.html', {'patient': patient})
+
+class ModelView(TemplateView):
+    def get(self, request, *args, **kwargs):
+        patient = Patient.objects.get(id=request.session.get('patient_id'))
+        return render(request, 'user/model.html', {'patient': patient})
 
 ################### 功能 ###################
 

@@ -1,0 +1,172 @@
+{% extends "user/patient_home.html" %}
+{% load static %}
+
+{% block content %}
+<main class="container py-5">
+    <!-- 数据集概览 -->
+    <section class="mb-5">
+        <div class="row g-4 align-items-center">
+            <div class="col-md-6">
+                <h1 class="display-5 fw-bold">皮肤病影像数据集</h1>
+                <div class="alert alert-info">
+                    <strong>数据组成：</strong>融合HAM10000与ISIC数据集的增强型数据库
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">✔ 总样本量：18,829张</li>
+                    <li class="list-group-item">✔ 覆盖7种最常见的皮肤病类型</li>
+                    <li class="list-group-item">✔ 选取自权威数据库ISIC</li>
+                    <li class="list-group-item">✔ 采用多种数据增强方法</li>
+                </ul>
+            </div>
+            {% comment %} <div class="col-md-6">
+                <img src="{% static 'images/dataset_samples.png' %}" 
+                     class="img-fluid rounded-3 shadow" 
+                     alt="数据集示例">
+            </div> {% endcomment %}
+        </div>
+    </section>
+
+    <section class="mb-5">
+        <h2 class="mb-4 border-bottom pb-2">数据集示例</h2>
+        <div class="row g-4">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                        <img src="{% static 'images/dataset_samples.png' %}" 
+                             class="img-fluid rounded-3 shadow" 
+                             alt="数据集示例">
+                </div>
+            </div>
+            {% comment %} <div class="col-md-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5>Melanoma增强</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                原始：1,113张
+                                <i class="bi bi-arrow-right"></i>
+                                增强后：3,545张
+                            </li>
+                            <li class="list-group-item">
+                                剔除低质量样本：732张
+                            </li>
+                            <li class="list-group-item">
+                                <img src="{% static 'images/mel_reject.jpg' %}" 
+                                     class="img-thumbnail" 
+                                     alt="剔除样本示例">
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div> {% endcomment %}
+        </div>
+    </section>
+
+    <!-- 数据增强 -->
+    <section class="mb-5">
+        <h2 class="mb-4 border-bottom pb-2">增强策略</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5>增强方法矩阵</h5>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>类别</th>
+                                    <th>增强方法</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>AKIEC</td>
+                                    <td>翻转+旋转+模糊</td>
+                                </tr>
+                                <tr>
+                                    <td>BCC</td>
+                                    <td>翻转+旋转+模糊</td>
+                                </tr>
+                                <tr>
+                                    <td>BKL</td>
+                                    <td>翻转+旋转+模糊</td>
+                                </tr>
+                                <tr>
+                                    <td>DF</td>
+                                    <td>翻转+旋转+模糊+弹性形变+局部增强+融合增强</td>
+                                </tr>
+                                <tr>
+                                    <td>MEL</td>
+                                    <td>无</td>
+                                </tr>
+                                <tr>
+                                    <td>NV</td>
+                                    <td>翻转+旋转+模糊</td>
+                                </tr>
+                                <tr>
+                                    <td>VASC</td>
+                                    <td>翻转+旋转+模糊</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5>增强效果展示</h5>
+                        <div class="row g-2">
+                                <img src="{% static 'images/aug.png' %}" 
+                                     class="img-thumbnail" 
+                                     alt="数据增强">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 数据划分 -->
+    <section class="mb-5">
+        <h2 class="mb-4 border-bottom pb-2">数据划分</h2>
+        <div class="row g-4">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5>划分策略</h5>
+                        <div class="progress" style="height: 30px;">
+                            <div class="progress-bar bg-success" style="width: 80%">训练集 80%</div>
+                            <div class="progress-bar bg-info" style="width: 20%">测试集 20%</div>
+                        </div>
+                        <ul class="list-group list-group-flush mt-3">
+                            <li class="list-group-item">严格分层抽样保证分布一致</li>
+                            <li class="list-group-item">初始训练集：10,623张</li>
+                            <li class="list-group-item">扩充后训练集：16,173张</li>
+                            <li class="list-group-item">测试集：2656张</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+// 数据划分饼图
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('splitChart').getContext('2d');
+    fetch(document.getElementById('splitChart').dataset.url)
+        .then(res => res.json())
+        .then(data => {
+            new Chart(ctx, {
+                type: 'pie',
+                data: data,
+                options: {
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "user/patient_home.html" %}
+{% load static %}
+
+{% block content %}
+<main class="container py-5">
+    <!-- 模型概述 -->
+    <section class="mb-5">
+        <div class="row g-4 align-items-center">
+            <div class="col-md-6">
+                <h1 class="display-5 fw-bold">ShuffleNet-B1 模型</h1>
+                <div class="alert alert-success">
+                    <strong>核心优势：</strong>在皮肤病分类任务中达到98.44%的Melanoma识别准确率，综合准确率达到了91.5%
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">✔ 融合多种数据增强技术增强技术</li>
+                    <li class="list-group-item">✔ 采用Focal Loss应对数据不均衡</li>
+                    <li class="list-group-item">✔ 支持移动端实时推理（<100ms）</li>
+                </ul>
+            </div>
+            <div class="col-md-6" style="max-width: 800px;">
+                <img src="{% static 'images/model_arch.png' %}" 
+                     class="img-fluid rounded-3 shadow" 
+                     alt="模型架构示意图">
+            </div>
+        </div>
+    </section>
+
+    <!-- 性能对比 -->
+    <section class="mb-5">
+        <h2 class="mb-4 border-bottom pb-2">模型性能对比</h2>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        
+                        <img src="{% static 'images/comparison.png' %}" 
+                             class="img-fluid" 
+                             alt="损失函数对比曲线">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 混淆矩阵 -->
+    <section class="mb-5">
+        <h2 class="mb-4 border-bottom pb-2">混淆矩阵分析</h2>
+        <div class="row g-4">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <img src="{% static 'images/confusion_matrix.png' %}" 
+                             class="img-fluid" 
+                             alt="混淆矩阵热力图">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5>各类别准确率</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                AKIEC
+                                <span class="badge bg-success">77.59</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                BCC
+                                <span class="badge bg-success">77.98%</span>
+                            </li>
+
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                BKL
+                                <span class="badge bg-success">67.80%</span>
+                            </li>
+
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                DF
+                                <span class="badge bg-success">85.71%</span>
+                            </li>
+
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Melanoma
+                                <span class="badge bg-success">98.44%</span>
+                            </li>
+                            
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                NV
+                                <span class="badge bg-success">93.10%</span>
+                            </li>
+
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                VASC
+                                <span class="badge bg-success">92.86%</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}
