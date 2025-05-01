@@ -245,8 +245,8 @@ class DoctorFilterForm(forms.Form):
         ('-name', '姓名降序'),
         ('title', '职称升序'),
         ('-title', '职称降序'),
-        ('birthday', '年龄升序'),
-        ('-birthday', '年龄降序'),
+        ('-birthday', '年龄升序'),
+        ('birthday', '年龄降序'),
     ]
     sort_by = forms.ChoiceField(label='排序方式', choices=SORT_CHOICES, required=False)
 
