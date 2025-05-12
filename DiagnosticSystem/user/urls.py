@@ -24,6 +24,8 @@ urlpatterns = [
     path('disease_intro/vasc', views.VASCView.as_view(), name='vasc'),
     path('dataset/', views.DatasetView.as_view(), name='dataset'),
     path('model/', views.ModelView.as_view(), name='model'),
+    # 分类
+    path('classify/', views.ClassificationView.as_view(), name='classify'),
     # 医生信息&预约
     path('doctors_list/', views.DoctorListView.as_view(), name='doctors_list'),
     path('doctor_detail/<int:pk>/', views.DoctorDetailView.as_view(), name='doctor_detail'),

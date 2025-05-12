@@ -11,6 +11,7 @@ from .models import Patient, Doctor, DoctorSchedule, Appointment, AppointmentSta
 from .forms import PatientCreationForm, PatientLoginForm, PatientForm, DoctorFilterForm, ScheduleFilterForm
 from .forms import DoctorLoginForm, DoctorForm, DoctorScheduleForm, MedicalRecordForm
 
+
 from services.ai_service import AISkinDiagnosisService
 from DiagnosticSystem.mixins import LoginRequiredMixin
 
@@ -268,6 +269,39 @@ class ModelView(TemplateView):
         return render(request, 'user/model.html', {'patient': patient})
 
 ################### 功能 ###################
+
+
+class ClassificationView(TemplateView):
+    template_name = 'user/classification_user.html'
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.ai_service = AISkinDiagnosisService()
+    def get(self, request, *args, **kwargs):
+        patient = Patient.objects.get(id=request.session.get('patient_id'))
+        return render(request, 'user/classification_user.html', {'patient': patient})
+    def post(self, request, *args, **kwargs):
+        patient = Patient.objects.get(id=request.session.get('patient_id'))
+        if request.method == 'POST':
+            upload_file = request.FILES['image']
+            if not os.path.exists(settings.MEDIA_ROOT):
+                os.makedirs(settings.MEDIA_ROOT)
+            file_path = os.path.join(settings.MEDIA_ROOT, upload_file.name)
+            with open(file_path, 'wb') as f:
+                for chunk in upload_file.chunks():
+                    f.write(chunk)
+
+            try:
+                result = self.ai_service.predict_image(file_path)
+                return render(request, 'user/classification_user.html', {
+                    'patient': patient,
+                    'top_predictions': result['top_predictions']
+                    })
+            except Exception as e:
+                return render(request, 'user/classification_user.html', {
+                    'error': f"无法处理文件，请确认您上传了正确的文件类型。错误信息：{str(e)}"
+                })
+        return render(request, 'user/classification_user.html', {'patient': patient})
 
 class DoctorListView(TemplateView):
     template_name = 'user/doctor_list.html'

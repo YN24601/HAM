@@ -32,7 +32,7 @@
               <a class="nav-link" href="#">症状查询</a>
             </li> {% endcomment %}
             <li class="nav-item">
-              <a class="nav-link" href="#">AI诊断</a>
+              <a class="nav-link" href={% url 'classify'%}>AI诊断</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href={% url 'doctors_list' %}>医师团队</a>
@@ -82,7 +82,7 @@
     </p>
 
     <div class="mb-5">
-      <a href="#" class="btn btn-primary btn-lg px-4">
+      <a href={% url 'classify'%} class="btn btn-primary btn-lg px-4">
         开始使用
       </a>
     </div>
@@ -97,7 +97,7 @@
         </p>
         <ul class="list-unstyled ps-0">
           <li>
-            <a class="icon-link mb-1" href="#" rel="noopener" target="_blank">
+            <a class="icon-link mb-1" href={% url 'classify'%} rel="noopener" target="_blank">
               <svg class="bi" width="16" height="16"><use xlink:href="#arrow-right-circle"/></svg>
               使用模型
             </a>
@@ -124,13 +124,13 @@
           </p>
         <ul class="list-unstyled ps-0">
           <li>
-            <a class="icon-link mb-1" href="#">
+            <a class="icon-link mb-1" href={% url 'doctors_list' %}>
               <svg class="bi" width="16" height="16"><use xlink:href="#arrow-right-circle"/></svg>
               医生信息
             </a>
           </li>
           <li>
-            <a class="icon-link mb-1" href="#">
+            <a class="icon-link mb-1" href={% url 'schedule_list' %}>
               <svg class="bi" width="16" height="16"><use xlink:href="#arrow-right-circle"/></svg>
               预约问诊
             </a>
