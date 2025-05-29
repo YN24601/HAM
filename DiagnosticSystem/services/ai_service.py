@@ -20,7 +20,7 @@ class AISkinDiagnosisService:
         self.model = models.shufflenet_v2_x1_0(pretrained=False)
         num_classes = 7
         
-        # 替换全连接层
+        # 替换全连接层 7类
         in_features = self.model.fc.in_features
         self.model.fc = nn.Linear(in_features, num_classes)
         
